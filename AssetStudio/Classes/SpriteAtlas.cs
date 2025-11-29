@@ -29,7 +29,7 @@ namespace AssetStudio
             uvTransform = reader.ReadVector4();
             downscaleMultiplier = reader.ReadSingle();
             settingsRaw = new SpriteSettings(reader);
-            if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2)) //2020.2 and up
+            if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2) || version[0] >= 6000) //2020.2 and up, Unity 6+
             {
                 var secondaryTexturesSize = reader.ReadInt32();
                 secondaryTextures = new SecondarySpriteTexture[secondaryTexturesSize];

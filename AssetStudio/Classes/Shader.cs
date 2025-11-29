@@ -250,7 +250,7 @@ namespace AssetStudio
             zTest = new SerializedShaderFloatValue(reader);
             zWrite = new SerializedShaderFloatValue(reader);
             culling = new SerializedShaderFloatValue(reader);
-            if (version[0] >= 2020) //2020.1 and up
+            if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
             {
                 conservative = new SerializedShaderFloatValue(reader);
             }
@@ -295,15 +295,83 @@ namespace AssetStudio
 
         public ParserBindChannels(BinaryReader reader)
         {
-            int numChannels = reader.ReadInt32();
-            m_Channels = new ShaderBindChannel[numChannels];
-            for (int i = 0; i < numChannels; i++)
+            try
             {
-                m_Channels[i] = new ShaderBindChannel(reader);
+                int numChannels = reader.ReadInt32();
+                
+                // Validate numChannels to prevent overflow
+                if (numChannels < 0 || numChannels > 1000) // Reasonable upper limit
+                {
+                    numChannels = 0;
+                }
+                
+                // Check available bytes
+                long currentPos = reader.BaseStream.Position;
+                long maxPos = reader.BaseStream.Length;
+                // Estimate: each channel needs at least 8 bytes
+                long estimatedBytesNeeded = numChannels * 8;
+                if (currentPos + estimatedBytesNeeded > maxPos)
+                {
+                    // Calculate maximum safe number of channels
+                    long availableBytes = maxPos - currentPos - 4; // Reserve space for m_SourceMap
+                    if (availableBytes > 0)
+                    {
+                        numChannels = Math.Min(numChannels, (int)(availableBytes / 8));
+                    }
+                    else
+                    {
+                        numChannels = 0;
+                    }
+                }
+                
+                m_Channels = new ShaderBindChannel[numChannels];
+                int actualCount = 0;
+                for (int i = 0; i < numChannels; i++)
+                {
+                    try
+                    {
+                        m_Channels[i] = new ShaderBindChannel(reader);
+                        actualCount++;
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        // If we hit end of stream, truncate the array and break
+                        if (actualCount < numChannels)
+                        {
+                            var truncated = new ShaderBindChannel[actualCount];
+                            Array.Copy(m_Channels, truncated, actualCount);
+                            m_Channels = truncated;
+                        }
+                        break;
+                    }
+                    catch (OverflowException)
+                    {
+                        // If overflow occurs, truncate the array and break
+                        if (actualCount < numChannels)
+                        {
+                            var truncated = new ShaderBindChannel[actualCount];
+                            Array.Copy(m_Channels, truncated, actualCount);
+                            m_Channels = truncated;
+                        }
+                        break;
+                    }
+                }
+                
+                reader.AlignStream();
+                m_SourceMap = reader.ReadUInt32();
             }
-            reader.AlignStream();
-
-            m_SourceMap = reader.ReadUInt32();
+            catch (EndOfStreamException)
+            {
+                // Set default values if we can't read them
+                m_Channels = Array.Empty<ShaderBindChannel>();
+                m_SourceMap = 0;
+            }
+            catch (OverflowException)
+            {
+                // Set default values if overflow occurs
+                m_Channels = Array.Empty<ShaderBindChannel>();
+                m_SourceMap = 0;
+            }
         }
     }
 
@@ -380,7 +448,7 @@ namespace AssetStudio
 
             m_NameIndex = reader.ReadInt32();
             m_Index = reader.ReadInt32();
-            if (version[0] >= 2020) //2020.1 and up
+            if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
             {
                 m_ArraySize = reader.ReadInt32();
             }
@@ -676,7 +744,7 @@ namespace AssetStudio
 
             if (version[0] > 2017 || (version[0] == 2017 && version[1] >= 2)) //2017.2 and up
             {
-                if (version[0] >= 2021) //2021.1 and up
+                if (version[0] >= 2021 || version[0] >= 6000) //2021.1 and up, Unity 6+
                 {
                     var m_ShaderRequirements = reader.ReadInt64();
                 }
@@ -714,7 +782,7 @@ namespace AssetStudio
                 m_CommonParameters = new SerializedProgramParameters(reader);
             }
 
-            if (version[0] > 2022 || (version[0] == 2022 && version[1] >= 1)) //2022.1 and up
+            if (version[0] > 2022 || (version[0] == 2022 && version[1] >= 1) || version[0] >= 6000) //2022.1 and up, Unity 6+
             {
                 m_SerializedKeywordStateMask = reader.ReadUInt16Array();
                 reader.AlignStream();
@@ -819,11 +887,63 @@ namespace AssetStudio
 
         public SerializedTagMap(BinaryReader reader)
         {
-            int numTags = reader.ReadInt32();
-            tags = new KeyValuePair<string, string>[numTags];
-            for (int i = 0; i < numTags; i++)
+            try
             {
-                tags[i] = new KeyValuePair<string, string>(reader.ReadAlignedString(), reader.ReadAlignedString());
+                int numTags = reader.ReadInt32();
+                
+                // Validate numTags to prevent reading beyond available data
+                if (numTags < 0 || numTags > 10000) // Reasonable upper limit
+                {
+                    numTags = 0;
+                }
+                
+                // Check available bytes
+                long currentPos = reader.BaseStream.Position;
+                long maxPos = reader.BaseStream.Length;
+                // Estimate: each tag needs at least 8 bytes (2 int32 for string lengths) + string data
+                long estimatedBytesNeeded = numTags * 16;
+                if (currentPos + estimatedBytesNeeded > maxPos)
+                {
+                    // Calculate maximum safe number of tags
+                    long availableBytes = maxPos - currentPos;
+                    if (availableBytes > 0)
+                    {
+                        numTags = Math.Min(numTags, (int)(availableBytes / 16));
+                    }
+                    else
+                    {
+                        numTags = 0;
+                    }
+                }
+                
+                tags = new KeyValuePair<string, string>[numTags];
+                int actualCount = 0;
+                for (int i = 0; i < numTags; i++)
+                {
+                    try
+                    {
+                        var key = reader.ReadAlignedString();
+                        var value = reader.ReadAlignedString();
+                        tags[i] = new KeyValuePair<string, string>(key, value);
+                        actualCount++;
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        // If we hit end of stream, truncate the array and break
+                        if (actualCount < numTags)
+                        {
+                            var truncated = new KeyValuePair<string, string>[actualCount];
+                            Array.Copy(tags, truncated, actualCount);
+                            tags = truncated;
+                        }
+                        break;
+                    }
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Set empty tags array if we can't read them
+                tags = Array.Empty<KeyValuePair<string, string>>();
             }
         }
     }
@@ -898,7 +1018,7 @@ namespace AssetStudio
                 m_SubShaders[i] = new SerializedSubShader(reader);
             }
 
-            if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 2)) //2021.2 and up
+            if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 2) || version[0] >= 6000) //2021.2 and up, Unity 6+
             {
                 m_KeywordNames = reader.ReadStringArray();
                 m_KeywordFlags = reader.ReadUInt8Array();
@@ -916,7 +1036,7 @@ namespace AssetStudio
                 m_Dependencies[i] = new SerializedShaderDependency(reader);
             }
 
-            if (version[0] >= 2021) //2021.1 and up
+            if (version[0] >= 2021 || version[0] >= 6000) //2021.1 and up, Unity 6+
             {
                 int m_CustomEditorForRenderPipelinesSize = reader.ReadInt32();
                 m_CustomEditorForRenderPipelines = new SerializedCustomEditorForRenderPipeline[m_CustomEditorForRenderPipelinesSize];

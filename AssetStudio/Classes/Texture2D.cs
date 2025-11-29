@@ -12,7 +12,7 @@ namespace AssetStudio
         {
             var version = reader.version;
 
-            if (version[0] >= 2020) //2020.1 and up
+            if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
             {
                 offset = reader.ReadInt64();
             }
@@ -68,7 +68,7 @@ namespace AssetStudio
             m_Width = reader.ReadInt32();
             m_Height = reader.ReadInt32();
             var m_CompleteImageSize = reader.ReadInt32();
-            if (version[0] >= 2020) //2020.1 and up
+            if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
             {
                 var m_MipsStripped = reader.ReadInt32();
             }
@@ -85,7 +85,7 @@ namespace AssetStudio
             {
                 var m_IsReadable = reader.ReadBoolean();
             }
-            if (version[0] >= 2020) //2020.1 and up
+            if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
             {
                 var m_IsPreProcessed = reader.ReadBoolean();
             }
@@ -120,7 +120,7 @@ namespace AssetStudio
             {
                 var m_ColorSpace = reader.ReadInt32();
             }
-            if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2)) //2020.2 and up
+            if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2) || version[0] >= 6000) //2020.2 and up, Unity 6+
             {
                 var m_PlatformBlob = reader.ReadUInt8Array();
                 reader.AlignStream();

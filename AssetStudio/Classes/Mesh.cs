@@ -651,7 +651,7 @@ namespace AssetStudio
 
             int m_MeshUsageFlags = reader.ReadInt32();
 
-            if (version[0] > 2022 || (version[0] == 2022 && version[1] >= 1)) //2022.1 and up
+            if (version[0] > 2022 || (version[0] == 2022 && version[1] >= 1) || version[0] >= 6000) //2022.1 and up, Unity 6+
             {
                 int m_CookingOptions = reader.ReadInt32();
             }

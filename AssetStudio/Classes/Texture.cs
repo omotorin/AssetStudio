@@ -13,7 +13,7 @@ namespace AssetStudio
             {
                 var m_ForcedFallbackFormat = reader.ReadInt32();
                 var m_DownscaleFallback = reader.ReadBoolean();
-                if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2)) //2020.2 and up
+                if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2) || version[0] >= 6000) //2020.2 and up, Unity 6+
                 {
                     var m_IsAlphaChannelOptional = reader.ReadBoolean();
                 }

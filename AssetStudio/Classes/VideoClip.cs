@@ -41,7 +41,7 @@ namespace AssetStudio
             reader.AlignStream();
             var m_AudioSampleRate = reader.ReadUInt32Array();
             var m_AudioLanguage = reader.ReadStringArray();
-            if (version[0] >= 2020) //2020.1 and up
+            if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
             {
                 var m_VideoShadersSize = reader.ReadInt32();
                 var m_VideoShaders = new PPtr<Shader>[m_VideoShadersSize];
@@ -52,7 +52,7 @@ namespace AssetStudio
             }
             m_ExternalResources = new StreamedResource(reader);
             var m_HasSplitAlpha = reader.ReadBoolean();
-            if (version[0] >= 2020) //2020.1 and up
+            if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
             {
                 var m_sRGB = reader.ReadBoolean();
             }

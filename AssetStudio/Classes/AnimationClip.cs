@@ -42,17 +42,69 @@ namespace AssetStudio
         {
             var version = reader.version;
             int numCurves = reader.ReadInt32();
+            
+            // Validate numCurves to prevent reading beyond available data
+            if (numCurves < 0 || numCurves > 1000000) // Reasonable upper limit
+            {
+                numCurves = 0;
+            }
+            
+            // Check available bytes to prevent reading beyond object bounds
+            long currentPos = reader.Position;
+            long maxPos = reader.byteStart + reader.byteSize;
+            // Estimate: each keyframe needs at least 16 bytes (time + value + slopes + optional weights)
+            long estimatedBytesNeeded = numCurves * 16;
+            if (currentPos + estimatedBytesNeeded > maxPos)
+            {
+                // Calculate maximum safe number of curves
+                long availableBytes = maxPos - currentPos - 16; // Reserve space for m_PreInfinity, m_PostInfinity, etc.
+                if (availableBytes > 0)
+                {
+                    numCurves = Math.Min(numCurves, (int)(availableBytes / 16));
+                }
+                else
+                {
+                    numCurves = 0;
+                }
+            }
+            
             m_Curve = new Keyframe<T>[numCurves];
+            int actualCount = 0;
             for (int i = 0; i < numCurves; i++)
             {
-                m_Curve[i] = new Keyframe<T>(reader, readerFunc);
+                try
+                {
+                    m_Curve[i] = new Keyframe<T>(reader, readerFunc);
+                    actualCount++;
+                }
+                catch (EndOfStreamException)
+                {
+                    // If we hit end of stream, truncate the array and break
+                    if (actualCount < numCurves)
+                    {
+                        var truncated = new Keyframe<T>[actualCount];
+                        Array.Copy(m_Curve, truncated, actualCount);
+                        m_Curve = truncated;
+                    }
+                    break;
+                }
             }
 
-            m_PreInfinity = reader.ReadInt32();
-            m_PostInfinity = reader.ReadInt32();
-            if (version[0] > 5 || (version[0] == 5 && version[1] >= 3))//5.3 and up
+            try
             {
-                m_RotationOrder = reader.ReadInt32();
+                m_PreInfinity = reader.ReadInt32();
+                m_PostInfinity = reader.ReadInt32();
+                if (version[0] > 5 || (version[0] == 5 && version[1] >= 3))//5.3 and up
+                {
+                    m_RotationOrder = reader.ReadInt32();
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Set default values if we can't read them
+                m_PreInfinity = 0;
+                m_PostInfinity = 0;
+                m_RotationOrder = 0;
             }
         }
     }
@@ -817,7 +869,7 @@ namespace AssetStudio
             }
             customType = reader.ReadByte();
             isPPtrCurve = reader.ReadByte();
-            if (version[0] > 2022 || (version[0] == 2022 && version[1] >= 1)) //2022.1 and up
+            if (version[0] > 2022 || (version[0] == 2022 && version[1] >= 1) || version[0] >= 6000) //2022.1 and up, Unity 6+
             {
                 isIntCurve = reader.ReadByte();
             }

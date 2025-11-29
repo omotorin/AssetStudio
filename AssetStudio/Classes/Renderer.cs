@@ -43,7 +43,7 @@ namespace AssetStudio
                     {
                         var m_DynamicOccludee = reader.ReadByte();
                     }
-                    if (version[0] >= 2021) //2021.1 and up
+                    if (version[0] >= 2021 || version[0] >= 6000) //2021.1 and up, Unity 6+
                     {
                         var m_StaticShadowCaster = reader.ReadByte();
                     }
@@ -54,7 +54,7 @@ namespace AssetStudio
                     {
                         var m_RayTracingMode = reader.ReadByte();
                     }
-                    if (version[0] >= 2020) //2020.1 and up
+                    if (version[0] >= 2020 || version[0] >= 6000) //2020.1 and up, Unity 6+
                     {
                         var m_RayTraceProcedural = reader.ReadByte();
                     }

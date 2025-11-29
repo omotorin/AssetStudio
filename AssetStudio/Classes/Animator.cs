@@ -31,7 +31,7 @@ namespace AssetStudio
             if (version[0] >= 5) //5.0 and up
             {
                 var m_LinearVelocityBlending = reader.ReadBoolean();
-                if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 2)) //2021.2 and up
+                if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 2) || version[0] >= 6000) //2021.2 and up, Unity 6+
                 {
                     var m_StabilizeFeet = reader.ReadBoolean();
                 }

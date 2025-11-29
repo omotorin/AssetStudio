@@ -34,7 +34,7 @@ namespace AssetStudio
                 m_TexEnvs[i] = new KeyValuePair<string, UnityTexEnv>(reader.ReadAlignedString(), new UnityTexEnv(reader));
             }
 
-            if (version[0] >= 2021) //2021.1 and up
+            if (version[0] >= 2021 || version[0] >= 6000) //2021.1 and up, Unity 6+
             {
                 int m_IntsSize = reader.ReadInt32();
                 m_Ints = new KeyValuePair<string, int>[m_IntsSize];
@@ -74,7 +74,7 @@ namespace AssetStudio
                 var m_ShaderKeywords = reader.ReadStringArray();
             }
 
-            if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 3)) //2021.3 and up
+            if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 3) || version[0] >= 6000) //2021.3 and up, Unity 6+
             {
                 var m_ValidKeywords = reader.ReadStringArray();
                 var m_InvalidKeywords = reader.ReadStringArray();
