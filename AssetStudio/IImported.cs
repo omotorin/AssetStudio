@@ -16,13 +16,13 @@ namespace AssetStudio
 
     public class ImportedFrame
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public Vector3 LocalRotation { get; set; }
         public Vector3 LocalPosition { get; set; }
         public Vector3 LocalScale { get; set; }
-        public ImportedFrame Parent { get; set; }
+        public ImportedFrame? Parent { get; set; }
 
-        private List<ImportedFrame> children;
+        private List<ImportedFrame> children = null!;
 
         public ImportedFrame this[int i] => children[i];
 
@@ -60,7 +60,7 @@ namespace AssetStudio
             children.Remove(frame);
         }
 
-        public ImportedFrame FindFrameByPath(string path)
+        public ImportedFrame? FindFrameByPath(string path)
         {
             var name = path.Substring(path.LastIndexOf('/') + 1);
             foreach (var frame in FindChilds(name))
@@ -73,7 +73,7 @@ namespace AssetStudio
             return null;
         }
 
-        public ImportedFrame FindRelativeFrameWithPath(string path)
+        public ImportedFrame? FindRelativeFrameWithPath(string path)
         {
             var subs = path.Split(new[] { '/' }, 2);
             foreach (var child in children)
@@ -95,7 +95,7 @@ namespace AssetStudio
             return null;
         }
 
-        public ImportedFrame FindFrame(string name)
+        public ImportedFrame? FindFrame(string name)
         {
             if (Name == name)
             {
@@ -112,7 +112,7 @@ namespace AssetStudio
             return null;
         }
 
-        public ImportedFrame FindChild(string name, bool recursive = true)
+        public ImportedFrame? FindChild(string name, bool recursive = true)
         {
             foreach (var child in children)
             {
@@ -153,20 +153,20 @@ namespace AssetStudio
 
     public class ImportedMesh
     {
-        public string Path { get; set; }
-        public List<ImportedVertex> VertexList { get; set; }
-        public List<ImportedSubmesh> SubmeshList { get; set; }
-        public List<ImportedBone> BoneList { get; set; }
+        public string Path { get; set; } = string.Empty;
+        public List<ImportedVertex> VertexList { get; set; } = null!;
+        public List<ImportedSubmesh> SubmeshList { get; set; } = null!;
+        public List<ImportedBone> BoneList { get; set; } = null!;
         public bool hasNormal { get; set; }
-        public bool[] hasUV { get; set; }
+        public bool[]? hasUV { get; set; }
         public bool hasTangent { get; set; }
         public bool hasColor { get; set; }
     }
 
     public class ImportedSubmesh
     {
-        public List<ImportedFace> FaceList { get; set; }
-        public string Material { get; set; }
+        public List<ImportedFace> FaceList { get; set; } = null!;
+        public string Material { get; set; } = string.Empty;
         public int BaseVertex { get; set; }
     }
 
@@ -174,27 +174,27 @@ namespace AssetStudio
     {
         public Vector3 Vertex { get; set; }
         public Vector3 Normal { get; set; }
-        public float[][] UV { get; set; }
+        public float[][]? UV { get; set; }
         public Vector4 Tangent { get; set; }
         public Color Color { get; set; }
-        public float[] Weights { get; set; }
-        public int[] BoneIndices { get; set; }
+        public float[]? Weights { get; set; }
+        public int[]? BoneIndices { get; set; }
     }
 
     public class ImportedFace
     {
-        public int[] VertexIndices { get; set; }
+        public int[] VertexIndices { get; set; } = null!;
     }
 
     public class ImportedBone
     {
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
         public Matrix4x4 Matrix { get; set; }
     }
 
     public class ImportedMaterial
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public Color Diffuse { get; set; }
         public Color Ambient { get; set; }
         public Color Specular { get; set; }
@@ -202,12 +202,12 @@ namespace AssetStudio
         public Color Reflection { get; set; }
         public float Shininess { get; set; }
         public float Transparency { get; set; }
-        public List<ImportedMaterialTexture> Textures { get; set; }
+        public List<ImportedMaterialTexture> Textures { get; set; } = null!;
     }
 
     public class ImportedMaterialTexture
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int Dest { get; set; }
         public Vector2 Offset { get; set; }
         public Vector2 Scale { get; set; }
@@ -215,8 +215,8 @@ namespace AssetStudio
 
     public class ImportedTexture
     {
-        public string Name { get; set; }
-        public byte[] Data { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public byte[] Data { get; set; } = null!;
 
         public ImportedTexture(MemoryStream stream, string name)
         {
@@ -227,9 +227,9 @@ namespace AssetStudio
 
     public class ImportedKeyframedAnimation
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public float SampleRate { get; set; }
-        public List<ImportedAnimationKeyframedTrack> TrackList { get; set; }
+        public List<ImportedAnimationKeyframedTrack> TrackList { get; set; } = null!;
 
         public ImportedAnimationKeyframedTrack FindTrack(string path)
         {
@@ -246,17 +246,17 @@ namespace AssetStudio
 
     public class ImportedAnimationKeyframedTrack
     {
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
         public List<ImportedKeyframe<Vector3>> Scalings = new List<ImportedKeyframe<Vector3>>();
         public List<ImportedKeyframe<Vector3>> Rotations = new List<ImportedKeyframe<Vector3>>();
         public List<ImportedKeyframe<Vector3>> Translations = new List<ImportedKeyframe<Vector3>>();
-        public ImportedBlendShape BlendShape;
+        public ImportedBlendShape? BlendShape;
     }
 
     public class ImportedKeyframe<T>
     {
         public float time { get; set; }
-        public T value { get; set; }
+        public T value { get; set; } = default!;
 
         public ImportedKeyframe(float time, T value)
         {
@@ -267,20 +267,20 @@ namespace AssetStudio
 
     public class ImportedBlendShape
     {
-        public string ChannelName;
+        public string ChannelName = string.Empty;
         public List<ImportedKeyframe<float>> Keyframes = new List<ImportedKeyframe<float>>();
     }
 
     public class ImportedMorph
     {
-        public string Path { get; set; }
-        public List<ImportedMorphChannel> Channels { get; set; }
+        public string Path { get; set; } = string.Empty;
+        public List<ImportedMorphChannel> Channels { get; set; } = null!;
     }
 
     public class ImportedMorphChannel
     {
-        public string Name { get; set; }
-        public List<ImportedMorphKeyframe> KeyframeList { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public List<ImportedMorphKeyframe> KeyframeList { get; set; } = null!;
     }
 
     public class ImportedMorphKeyframe
@@ -288,18 +288,18 @@ namespace AssetStudio
         public bool hasNormals { get; set; }
         public bool hasTangents { get; set; }
         public float Weight { get; set; }
-        public List<ImportedMorphVertex> VertexList { get; set; }
+        public List<ImportedMorphVertex> VertexList { get; set; } = null!;
     }
 
     public class ImportedMorphVertex
     {
         public uint Index { get; set; }
-        public ImportedVertex Vertex { get; set; }
+        public ImportedVertex Vertex { get; set; } = null!;
     }
 
     public static class ImportedHelpers
     {
-        public static ImportedMesh FindMesh(string path, List<ImportedMesh> importedMeshList)
+        public static ImportedMesh? FindMesh(string path, List<ImportedMesh> importedMeshList)
         {
             foreach (var mesh in importedMeshList)
             {
@@ -312,7 +312,7 @@ namespace AssetStudio
             return null;
         }
 
-        public static ImportedMaterial FindMaterial(string name, List<ImportedMaterial> importedMats)
+        public static ImportedMaterial? FindMaterial(string name, List<ImportedMaterial> importedMats)
         {
             foreach (var mat in importedMats)
             {
@@ -325,7 +325,7 @@ namespace AssetStudio
             return null;
         }
 
-        public static ImportedTexture FindTexture(string name, List<ImportedTexture> importedTextureList)
+        public static ImportedTexture? FindTexture(string name, List<ImportedTexture> importedTextureList)
         {
             if (string.IsNullOrEmpty(name))
             {
