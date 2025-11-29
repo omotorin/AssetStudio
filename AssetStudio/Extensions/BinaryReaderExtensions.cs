@@ -91,12 +91,27 @@ namespace AssetStudio
 
         private static T[] ReadArray<T>(Func<T> del, int length)
         {
-            var array = new T[length];
-            for (int i = 0; i < length; i++)
+            if (length < 0 || length > 1000000) // Sanity check
             {
-                array[i] = del();
+                return Array.Empty<T>();
             }
-            return array;
+            var array = new List<T>();
+            try
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    array.Add(del());
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Return partial array if stream ends prematurely
+            }
+            catch (OverflowException)
+            {
+                // Return partial array if overflow occurs
+            }
+            return array.ToArray();
         }
 
         public static bool[] ReadBooleanArray(this BinaryReader reader)
@@ -111,7 +126,28 @@ namespace AssetStudio
 
         public static ushort[] ReadUInt16Array(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadUInt16, reader.ReadInt32());
+            try
+            {
+                var length = reader.ReadInt32();
+                if (length < 0 || length > 1000000) // Sanity check
+                {
+                    return Array.Empty<ushort>();
+                }
+                // Check if we have enough bytes
+                if (reader.BaseStream.Position + length * sizeof(ushort) > reader.BaseStream.Length)
+                {
+                    return Array.Empty<ushort>();
+                }
+                return ReadArray(reader.ReadUInt16, length);
+            }
+            catch (EndOfStreamException)
+            {
+                return Array.Empty<ushort>();
+            }
+            catch (OverflowException)
+            {
+                return Array.Empty<ushort>();
+            }
         }
 
         public static int[] ReadInt32Array(this BinaryReader reader)

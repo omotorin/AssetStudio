@@ -654,17 +654,39 @@ namespace AssetStudio
 
             if ((version[0] >= 2019 && version[0] < 2021) || (version[0] == 2021 && version[1] < 2)) //2019 ~2021.1
             {
-                var m_GlobalKeywordIndices = reader.ReadUInt16Array();
-                reader.AlignStream();
-                var m_LocalKeywordIndices = reader.ReadUInt16Array();
-                reader.AlignStream();
+                try
+                {
+                    var m_GlobalKeywordIndices = reader.ReadUInt16Array();
+                    reader.AlignStream();
+                    var m_LocalKeywordIndices = reader.ReadUInt16Array();
+                    reader.AlignStream();
+                }
+                catch (EndOfStreamException)
+                {
+                    // Ignore - arrays will be empty
+                }
+                catch (OverflowException)
+                {
+                    // Ignore - arrays will be empty
+                }
             }
             else
             {
-                m_KeywordIndices = reader.ReadUInt16Array();
-                if (version[0] >= 2017) //2017 and up
+                try
                 {
-                    reader.AlignStream();
+                    m_KeywordIndices = reader.ReadUInt16Array();
+                    if (version[0] >= 2017) //2017 and up
+                    {
+                        reader.AlignStream();
+                    }
+                }
+                catch (EndOfStreamException)
+                {
+                    m_KeywordIndices = Array.Empty<ushort>();
+                }
+                catch (OverflowException)
+                {
+                    m_KeywordIndices = Array.Empty<ushort>();
                 }
             }
 
@@ -770,7 +792,26 @@ namespace AssetStudio
             m_SubPrograms = new SerializedSubProgram[numSubPrograms];
             for (int i = 0; i < numSubPrograms; i++)
             {
-                m_SubPrograms[i] = new SerializedSubProgram(reader);
+                try
+                {
+                    m_SubPrograms[i] = new SerializedSubProgram(reader);
+                }
+                catch (EndOfStreamException)
+                {
+                    // Truncate array if stream ends prematurely
+                    var truncated = new SerializedSubProgram[i];
+                    Array.Copy(m_SubPrograms, truncated, i);
+                    m_SubPrograms = truncated;
+                    break;
+                }
+                catch (OverflowException)
+                {
+                    // Truncate array if overflow occurs
+                    var truncated = new SerializedSubProgram[i];
+                    Array.Copy(m_SubPrograms, truncated, i);
+                    m_SubPrograms = truncated;
+                    break;
+                }
             }
 
             if ((version[0] == 2020 && version[1] > 3) ||
@@ -824,59 +865,131 @@ namespace AssetStudio
         {
             var version = reader.version;
 
-            if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2)) //2020.2 and up
+            try
             {
-                int numEditorDataHash = reader.ReadInt32();
-                m_EditorDataHash = new Hash128[numEditorDataHash];
-                for (int i = 0; i < numEditorDataHash; i++)
+                if (version[0] > 2020 || (version[0] == 2020 && version[1] >= 2)) //2020.2 and up
                 {
-                    m_EditorDataHash[i] = new Hash128(reader);
+                    int numEditorDataHash = reader.ReadInt32();
+                    if (numEditorDataHash >= 0 && numEditorDataHash <= 10000)
+                    {
+                        m_EditorDataHash = new Hash128[numEditorDataHash];
+                        for (int i = 0; i < numEditorDataHash; i++)
+                        {
+                            try
+                            {
+                                m_EditorDataHash[i] = new Hash128(reader);
+                            }
+                            catch (EndOfStreamException)
+                            {
+                                var truncated = new Hash128[i];
+                                Array.Copy(m_EditorDataHash, truncated, i);
+                                m_EditorDataHash = truncated;
+                                break;
+                            }
+                        }
+                        reader.AlignStream();
+                        m_Platforms = reader.ReadUInt8Array();
+                        reader.AlignStream();
+                        if (version[0] < 2021 || (version[0] == 2021 && version[1] < 2)) //2021.1 and down
+                        {
+                            m_LocalKeywordMask = reader.ReadUInt16Array();
+                            reader.AlignStream();
+                            m_GlobalKeywordMask = reader.ReadUInt16Array();
+                            reader.AlignStream();
+                        }
+                    }
                 }
-                reader.AlignStream();
-                m_Platforms = reader.ReadUInt8Array();
-                reader.AlignStream();
-                if (version[0] < 2021 || (version[0] == 2021 && version[1] < 2)) //2021.1 and down
-                {
-                    m_LocalKeywordMask = reader.ReadUInt16Array();
-                    reader.AlignStream();
-                    m_GlobalKeywordMask = reader.ReadUInt16Array();
-                    reader.AlignStream();
-                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Set defaults on stream end
+                if (m_EditorDataHash == null) m_EditorDataHash = Array.Empty<Hash128>();
+                if (m_Platforms == null) m_Platforms = Array.Empty<byte>();
+                if (m_LocalKeywordMask == null) m_LocalKeywordMask = Array.Empty<ushort>();
+                if (m_GlobalKeywordMask == null) m_GlobalKeywordMask = Array.Empty<ushort>();
+            }
+            catch (OverflowException)
+            {
+                // Set defaults on overflow
+                if (m_EditorDataHash == null) m_EditorDataHash = Array.Empty<Hash128>();
+                if (m_Platforms == null) m_Platforms = Array.Empty<byte>();
+                if (m_LocalKeywordMask == null) m_LocalKeywordMask = Array.Empty<ushort>();
+                if (m_GlobalKeywordMask == null) m_GlobalKeywordMask = Array.Empty<ushort>();
             }
 
-            int numIndices = reader.ReadInt32();
-            m_NameIndices = new KeyValuePair<string, int>[numIndices];
-            for (int i = 0; i < numIndices; i++)
+            try
             {
-                m_NameIndices[i] = new KeyValuePair<string, int>(reader.ReadAlignedString(), reader.ReadInt32());
-            }
+                int numIndices = reader.ReadInt32();
+                if (numIndices < 0 || numIndices > 10000)
+                {
+                    m_NameIndices = Array.Empty<KeyValuePair<string, int>>();
+                }
+                else
+                {
+                    m_NameIndices = new KeyValuePair<string, int>[numIndices];
+                    for (int i = 0; i < numIndices; i++)
+                    {
+                        try
+                        {
+                            m_NameIndices[i] = new KeyValuePair<string, int>(reader.ReadAlignedString(), reader.ReadInt32());
+                        }
+                        catch (EndOfStreamException)
+                        {
+                            var truncated = new KeyValuePair<string, int>[i];
+                            Array.Copy(m_NameIndices, truncated, i);
+                            m_NameIndices = truncated;
+                            break;
+                        }
+                    }
+                }
 
-            m_Type = (PassType)reader.ReadInt32();
-            m_State = new SerializedShaderState(reader);
-            m_ProgramMask = reader.ReadUInt32();
-            progVertex = new SerializedProgram(reader);
-            progFragment = new SerializedProgram(reader);
-            progGeometry = new SerializedProgram(reader);
-            progHull = new SerializedProgram(reader);
-            progDomain = new SerializedProgram(reader);
-            if (version[0] > 2019 || (version[0] == 2019 && version[1] >= 3)) //2019.3 and up
-            {
-                progRayTracing = new SerializedProgram(reader);
-            }
-            m_HasInstancingVariant = reader.ReadBoolean();
-            if (version[0] >= 2018) //2018 and up
-            {
-                var m_HasProceduralInstancingVariant = reader.ReadBoolean();
-            }
-            reader.AlignStream();
-            m_UseName = reader.ReadAlignedString();
-            m_Name = reader.ReadAlignedString();
-            m_TextureName = reader.ReadAlignedString();
-            m_Tags = new SerializedTagMap(reader);
-            if (version[0] == 2021 && version[1] >= 2) //2021.2 ~2021.x
-            {
-                m_SerializedKeywordStateMask = reader.ReadUInt16Array();
+                m_Type = (PassType)reader.ReadInt32();
+                m_State = new SerializedShaderState(reader);
+                m_ProgramMask = reader.ReadUInt32();
+                progVertex = new SerializedProgram(reader);
+                progFragment = new SerializedProgram(reader);
+                progGeometry = new SerializedProgram(reader);
+                progHull = new SerializedProgram(reader);
+                progDomain = new SerializedProgram(reader);
+                if (version[0] > 2019 || (version[0] == 2019 && version[1] >= 3)) //2019.3 and up
+                {
+                    progRayTracing = new SerializedProgram(reader);
+                }
+                m_HasInstancingVariant = reader.ReadBoolean();
+                if (version[0] >= 2018) //2018 and up
+                {
+                    var m_HasProceduralInstancingVariant = reader.ReadBoolean();
+                }
                 reader.AlignStream();
+                m_UseName = reader.ReadAlignedString();
+                m_Name = reader.ReadAlignedString();
+                m_TextureName = reader.ReadAlignedString();
+                m_Tags = new SerializedTagMap(reader);
+                if (version[0] == 2021 && version[1] >= 2) //2021.2 ~2021.x
+                {
+                    m_SerializedKeywordStateMask = reader.ReadUInt16Array();
+                    reader.AlignStream();
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Set defaults on stream end
+                if (m_NameIndices == null) m_NameIndices = Array.Empty<KeyValuePair<string, int>>();
+                if (m_State == null) m_State = new SerializedShaderState(reader);
+                if (m_Tags == null) m_Tags = new SerializedTagMap(reader);
+                if (m_UseName == null) m_UseName = string.Empty;
+                if (m_Name == null) m_Name = string.Empty;
+                if (m_TextureName == null) m_TextureName = string.Empty;
+            }
+            catch (OverflowException)
+            {
+                // Set defaults on overflow
+                if (m_NameIndices == null) m_NameIndices = Array.Empty<KeyValuePair<string, int>>();
+                if (m_State == null) m_State = new SerializedShaderState(reader);
+                if (m_Tags == null) m_Tags = new SerializedTagMap(reader);
+                if (m_UseName == null) m_UseName = string.Empty;
+                if (m_Name == null) m_Name = string.Empty;
+                if (m_TextureName == null) m_TextureName = string.Empty;
             }
         }
     }
@@ -956,15 +1069,52 @@ namespace AssetStudio
 
         public SerializedSubShader(ObjectReader reader)
         {
-            int numPasses = reader.ReadInt32();
-            m_Passes = new SerializedPass[numPasses];
-            for (int i = 0; i < numPasses; i++)
+            try
             {
-                m_Passes[i] = new SerializedPass(reader);
-            }
+                int numPasses = reader.ReadInt32();
+                if (numPasses < 0 || numPasses > 1000)
+                {
+                    m_Passes = Array.Empty<SerializedPass>();
+                }
+                else
+                {
+                    m_Passes = new SerializedPass[numPasses];
+                    for (int i = 0; i < numPasses; i++)
+                    {
+                        try
+                        {
+                            m_Passes[i] = new SerializedPass(reader);
+                        }
+                        catch (EndOfStreamException)
+                        {
+                            var truncated = new SerializedPass[i];
+                            Array.Copy(m_Passes, truncated, i);
+                            m_Passes = truncated;
+                            break;
+                        }
+                        catch (OverflowException)
+                        {
+                            var truncated = new SerializedPass[i];
+                            Array.Copy(m_Passes, truncated, i);
+                            m_Passes = truncated;
+                            break;
+                        }
+                    }
+                }
 
-            m_Tags = new SerializedTagMap(reader);
-            m_LOD = reader.ReadInt32();
+                m_Tags = new SerializedTagMap(reader);
+                m_LOD = reader.ReadInt32();
+            }
+            catch (EndOfStreamException)
+            {
+                if (m_Passes == null) m_Passes = Array.Empty<SerializedPass>();
+                if (m_Tags == null) m_Tags = new SerializedTagMap(reader);
+            }
+            catch (OverflowException)
+            {
+                if (m_Passes == null) m_Passes = Array.Empty<SerializedPass>();
+                if (m_Tags == null) m_Tags = new SerializedTagMap(reader);
+            }
         }
     }
 
@@ -1011,43 +1161,125 @@ namespace AssetStudio
 
             m_PropInfo = new SerializedProperties(reader);
 
-            int numSubShaders = reader.ReadInt32();
-            m_SubShaders = new SerializedSubShader[numSubShaders];
-            for (int i = 0; i < numSubShaders; i++)
+            try
             {
-                m_SubShaders[i] = new SerializedSubShader(reader);
-            }
+                int numSubShaders = reader.ReadInt32();
+                if (numSubShaders < 0 || numSubShaders > 1000)
+                {
+                    m_SubShaders = Array.Empty<SerializedSubShader>();
+                }
+                else
+                {
+                    m_SubShaders = new SerializedSubShader[numSubShaders];
+                    for (int i = 0; i < numSubShaders; i++)
+                    {
+                        try
+                        {
+                            m_SubShaders[i] = new SerializedSubShader(reader);
+                        }
+                        catch (EndOfStreamException)
+                        {
+                            var truncated = new SerializedSubShader[i];
+                            Array.Copy(m_SubShaders, truncated, i);
+                            m_SubShaders = truncated;
+                            break;
+                        }
+                        catch (OverflowException)
+                        {
+                            var truncated = new SerializedSubShader[i];
+                            Array.Copy(m_SubShaders, truncated, i);
+                            m_SubShaders = truncated;
+                            break;
+                        }
+                    }
+                }
 
-            if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 2) || version[0] >= 6000) //2021.2 and up, Unity 6+
-            {
-                m_KeywordNames = reader.ReadStringArray();
-                m_KeywordFlags = reader.ReadUInt8Array();
+                if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 2) || version[0] >= 6000) //2021.2 and up, Unity 6+
+                {
+                    try
+                    {
+                        m_KeywordNames = reader.ReadStringArray();
+                        m_KeywordFlags = reader.ReadUInt8Array();
+                        reader.AlignStream();
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        m_KeywordNames = Array.Empty<string>();
+                        m_KeywordFlags = Array.Empty<byte>();
+                    }
+                }
+
+                m_Name = reader.ReadAlignedString();
+                m_CustomEditorName = reader.ReadAlignedString();
+                m_FallbackName = reader.ReadAlignedString();
+
+                int numDependencies = reader.ReadInt32();
+                if (numDependencies < 0 || numDependencies > 1000)
+                {
+                    m_Dependencies = Array.Empty<SerializedShaderDependency>();
+                }
+                else
+                {
+                    m_Dependencies = new SerializedShaderDependency[numDependencies];
+                    for (int i = 0; i < numDependencies; i++)
+                    {
+                        try
+                        {
+                            m_Dependencies[i] = new SerializedShaderDependency(reader);
+                        }
+                        catch (EndOfStreamException)
+                        {
+                            var truncated = new SerializedShaderDependency[i];
+                            Array.Copy(m_Dependencies, truncated, i);
+                            m_Dependencies = truncated;
+                            break;
+                        }
+                    }
+                }
+
+                if (version[0] >= 2021 || version[0] >= 6000) //2021.1 and up, Unity 6+
+                {
+                    try
+                    {
+                        int m_CustomEditorForRenderPipelinesSize = reader.ReadInt32();
+                        if (m_CustomEditorForRenderPipelinesSize >= 0 && m_CustomEditorForRenderPipelinesSize <= 1000)
+                        {
+                            m_CustomEditorForRenderPipelines = new SerializedCustomEditorForRenderPipeline[m_CustomEditorForRenderPipelinesSize];
+                            for (int i = 0; i < m_CustomEditorForRenderPipelinesSize; i++)
+                            {
+                                try
+                                {
+                                    m_CustomEditorForRenderPipelines[i] = new SerializedCustomEditorForRenderPipeline(reader);
+                                }
+                                catch (EndOfStreamException)
+                                {
+                                    var truncated = new SerializedCustomEditorForRenderPipeline[i];
+                                    Array.Copy(m_CustomEditorForRenderPipelines, truncated, i);
+                                    m_CustomEditorForRenderPipelines = truncated;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        m_CustomEditorForRenderPipelines = Array.Empty<SerializedCustomEditorForRenderPipeline>();
+                    }
+                }
+
+                m_DisableNoSubshadersMessage = reader.ReadBoolean();
                 reader.AlignStream();
             }
-
-            m_Name = reader.ReadAlignedString();
-            m_CustomEditorName = reader.ReadAlignedString();
-            m_FallbackName = reader.ReadAlignedString();
-
-            int numDependencies = reader.ReadInt32();
-            m_Dependencies = new SerializedShaderDependency[numDependencies];
-            for (int i = 0; i < numDependencies; i++)
+            catch (EndOfStreamException)
             {
-                m_Dependencies[i] = new SerializedShaderDependency(reader);
+                if (m_SubShaders == null) m_SubShaders = Array.Empty<SerializedSubShader>();
+                if (m_Dependencies == null) m_Dependencies = Array.Empty<SerializedShaderDependency>();
             }
-
-            if (version[0] >= 2021 || version[0] >= 6000) //2021.1 and up, Unity 6+
+            catch (OverflowException)
             {
-                int m_CustomEditorForRenderPipelinesSize = reader.ReadInt32();
-                m_CustomEditorForRenderPipelines = new SerializedCustomEditorForRenderPipeline[m_CustomEditorForRenderPipelinesSize];
-                for (int i = 0; i < m_CustomEditorForRenderPipelinesSize; i++)
-                {
-                    m_CustomEditorForRenderPipelines[i] = new SerializedCustomEditorForRenderPipeline(reader);
-                }
+                if (m_SubShaders == null) m_SubShaders = Array.Empty<SerializedSubShader>();
+                if (m_Dependencies == null) m_Dependencies = Array.Empty<SerializedShaderDependency>();
             }
-
-            m_DisableNoSubshadersMessage = reader.ReadBoolean();
-            reader.AlignStream();
         }
     }
 
@@ -1099,22 +1331,41 @@ namespace AssetStudio
         {
             if (version[0] == 5 && version[1] >= 5 || version[0] > 5) //5.5 and up
             {
-                m_ParsedForm = new SerializedShader(reader);
-                platforms = reader.ReadUInt32Array().Select(x => (ShaderCompilerPlatform)x).ToArray();
-                if (version[0] > 2019 || (version[0] == 2019 && version[1] >= 3)) //2019.3 and up
+                try
                 {
-                    offsets = reader.ReadUInt32ArrayArray();
-                    compressedLengths = reader.ReadUInt32ArrayArray();
-                    decompressedLengths = reader.ReadUInt32ArrayArray();
+                    m_ParsedForm = new SerializedShader(reader);
+                    platforms = reader.ReadUInt32Array().Select(x => (ShaderCompilerPlatform)x).ToArray();
+                    if (version[0] > 2019 || (version[0] == 2019 && version[1] >= 3)) //2019.3 and up
+                    {
+                        offsets = reader.ReadUInt32ArrayArray();
+                        compressedLengths = reader.ReadUInt32ArrayArray();
+                        decompressedLengths = reader.ReadUInt32ArrayArray();
+                    }
+                    else
+                    {
+                        offsets = reader.ReadUInt32Array().Select(x => new[] { x }).ToArray();
+                        compressedLengths = reader.ReadUInt32Array().Select(x => new[] { x }).ToArray();
+                        decompressedLengths = reader.ReadUInt32Array().Select(x => new[] { x }).ToArray();
+                    }
+                    compressedBlob = reader.ReadUInt8Array();
+                    reader.AlignStream();
                 }
-                else
+                catch (EndOfStreamException)
                 {
-                    offsets = reader.ReadUInt32Array().Select(x => new[] { x }).ToArray();
-                    compressedLengths = reader.ReadUInt32Array().Select(x => new[] { x }).ToArray();
-                    decompressedLengths = reader.ReadUInt32Array().Select(x => new[] { x }).ToArray();
+                    platforms = Array.Empty<ShaderCompilerPlatform>();
+                    offsets = Array.Empty<uint[]>();
+                    compressedLengths = Array.Empty<uint[]>();
+                    decompressedLengths = Array.Empty<uint[]>();
+                    compressedBlob = Array.Empty<byte>();
                 }
-                compressedBlob = reader.ReadUInt8Array();
-                reader.AlignStream();
+                catch (OverflowException)
+                {
+                    platforms = Array.Empty<ShaderCompilerPlatform>();
+                    offsets = Array.Empty<uint[]>();
+                    compressedLengths = Array.Empty<uint[]>();
+                    decompressedLengths = Array.Empty<uint[]>();
+                    compressedBlob = Array.Empty<byte>();
+                }
 
                 var m_DependenciesCount = reader.ReadInt32();
                 for (int i = 0; i < m_DependenciesCount; i++)
