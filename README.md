@@ -7,7 +7,7 @@ AssetStudio is a tool for exploring, extracting and exporting assets and assetbu
 
 ## Features
 * Support version:
-  * 3.4 - 2022.1
+  * 3.4 - 2022.1, Unity 6
 * Support asset types:
   * **Texture2D** : convert to png, tga, jpeg, bmp
   * **Sprite** : crop Texture2D to png, tga, jpeg, bmp
@@ -29,6 +29,10 @@ AssetStudio is a tool for exploring, extracting and exporting assets and assetbu
    - [.NET Desktop Runtime 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
 - AssetStudio.net6
    - [.NET Desktop Runtime 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
+- AssetStudio.net8
+   - [.NET Desktop Runtime 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+- AssetStudio.net9
+   - [.NET Desktop Runtime 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
 
 
 ## Usage
@@ -71,6 +75,14 @@ First, use my another program [Il2CppDumper](https://github.com/Perfare/Il2CppDu
 
 * Visual Studio 2022 or newer
 * **AssetStudioFBXNative** uses [FBX SDK 2020.2.1](https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2020-2-1), before building, you need to install the FBX SDK and modify the project file, change include directory and library directory to point to the FBX SDK directory
+
+## Recent Updates
+
+* Unity 6 support
+* .NET 8.0 and 9.0 support
+* Fixed compiler warnings (nullable reference types)
+* Improved error handling with copyable error messages
+* Enhanced robustness for malformed Unity assets
 
 ## Open source libraries used
 

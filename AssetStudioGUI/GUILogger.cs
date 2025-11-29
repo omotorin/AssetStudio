@@ -21,7 +21,10 @@ namespace AssetStudioGUI
                 case LoggerEvent.Error:
                     if (ShowErrorMessage)
                     {
-                        MessageBox.Show(message);
+                        using (var errorDialog = new ErrorDialog(message))
+                        {
+                            errorDialog.ShowDialog();
+                        }
                     }
                     break;
                 default:
