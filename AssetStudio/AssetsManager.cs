@@ -10,7 +10,7 @@ namespace AssetStudio
 {
     public class AssetsManager
     {
-        public string SpecifyUnityVersion;
+        public string? SpecifyUnityVersion;
         public List<SerializedFile> assetsFileList = new List<SerializedFile>();
 
         internal Dictionary<string, int> assetsFileIndexCache = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -158,7 +158,7 @@ namespace AssetStudio
                     assetsFile.originalPath = originalPath;
                     if (!string.IsNullOrEmpty(unityVersion) && assetsFile.header.m_Version < SerializedFileFormatVersion.Unknown_7)
                     {
-                        assetsFile.SetVersion(unityVersion);
+                        assetsFile.SetVersion(unityVersion!);
                     }
                     CheckStrippedVersion(assetsFile);
                     assetsFileList.Add(assetsFile);
@@ -544,14 +544,13 @@ namespace AssetStudio
                         {
                             if (m_PackedSprite.TryGet(out var m_Sprite))
                             {
-                                if (m_Sprite.m_SpriteAtlas.IsNull)
+                                if (m_Sprite?.m_SpriteAtlas.IsNull == true)
                                 {
                                     m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
                                 }
-                                else
+                                else if (m_Sprite != null)
                                 {
-                                    m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlaOld);
-                                    if (m_SpriteAtlaOld.m_IsVariant)
+                                    if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlaOld) && m_SpriteAtlaOld?.m_IsVariant == true)
                                     {
                                         m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
                                     }

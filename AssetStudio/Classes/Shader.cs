@@ -7,7 +7,7 @@ namespace AssetStudio
 {
     public class Hash128
     {
-        public byte[] bytes;
+        public byte[] bytes = null!;
 
         public Hash128(BinaryReader reader)
         {
@@ -17,8 +17,8 @@ namespace AssetStudio
 
     public class StructParameter
     {
-        public MatrixParameter[] m_MatrixParams;
-        public VectorParameter[] m_VectorParams;
+        public MatrixParameter[] m_MatrixParams = null!;
+        public VectorParameter[] m_VectorParams = null!;
 
         public StructParameter(BinaryReader reader)
         {
@@ -68,7 +68,7 @@ namespace AssetStudio
 
     public class SerializedTextureProperty
     {
-        public string m_DefaultName;
+        public string m_DefaultName = string.Empty;
         public TextureDimension m_TexDim;
 
         public SerializedTextureProperty(BinaryReader reader)
@@ -90,13 +90,13 @@ namespace AssetStudio
 
     public class SerializedProperty
     {
-        public string m_Name;
-        public string m_Description;
-        public string[] m_Attributes;
+        public string m_Name = string.Empty;
+        public string m_Description = string.Empty;
+        public string[] m_Attributes = null!;
         public SerializedPropertyType m_Type;
         public uint m_Flags;
-        public float[] m_DefValue;
-        public SerializedTextureProperty m_DefTexture;
+        public float[] m_DefValue = null!;
+        public SerializedTextureProperty m_DefTexture = null!;
 
         public SerializedProperty(BinaryReader reader)
         {
@@ -112,7 +112,7 @@ namespace AssetStudio
 
     public class SerializedProperties
     {
-        public SerializedProperty[] m_Props;
+        public SerializedProperty[] m_Props = null!;
 
         public SerializedProperties(BinaryReader reader)
         {
@@ -128,7 +128,7 @@ namespace AssetStudio
     public class SerializedShaderFloatValue
     {
         public float val;
-        public string name;
+        public string name = string.Empty;
 
         public SerializedShaderFloatValue(BinaryReader reader)
         {
@@ -139,13 +139,13 @@ namespace AssetStudio
 
     public class SerializedShaderRTBlendState
     {
-        public SerializedShaderFloatValue srcBlend;
-        public SerializedShaderFloatValue destBlend;
-        public SerializedShaderFloatValue srcBlendAlpha;
-        public SerializedShaderFloatValue destBlendAlpha;
-        public SerializedShaderFloatValue blendOp;
-        public SerializedShaderFloatValue blendOpAlpha;
-        public SerializedShaderFloatValue colMask;
+        public SerializedShaderFloatValue srcBlend = null!;
+        public SerializedShaderFloatValue destBlend = null!;
+        public SerializedShaderFloatValue srcBlendAlpha = null!;
+        public SerializedShaderFloatValue destBlendAlpha = null!;
+        public SerializedShaderFloatValue blendOp = null!;
+        public SerializedShaderFloatValue blendOpAlpha = null!;
+        public SerializedShaderFloatValue colMask = null!;
 
         public SerializedShaderRTBlendState(BinaryReader reader)
         {
@@ -161,10 +161,10 @@ namespace AssetStudio
 
     public class SerializedStencilOp
     {
-        public SerializedShaderFloatValue pass;
-        public SerializedShaderFloatValue fail;
-        public SerializedShaderFloatValue zFail;
-        public SerializedShaderFloatValue comp;
+        public SerializedShaderFloatValue pass = null!;
+        public SerializedShaderFloatValue fail = null!;
+        public SerializedShaderFloatValue zFail = null!;
+        public SerializedShaderFloatValue comp = null!;
 
         public SerializedStencilOp(BinaryReader reader)
         {
@@ -177,11 +177,11 @@ namespace AssetStudio
 
     public class SerializedShaderVectorValue
     {
-        public SerializedShaderFloatValue x;
-        public SerializedShaderFloatValue y;
-        public SerializedShaderFloatValue z;
-        public SerializedShaderFloatValue w;
-        public string name;
+        public SerializedShaderFloatValue x = null!;
+        public SerializedShaderFloatValue y = null!;
+        public SerializedShaderFloatValue z = null!;
+        public SerializedShaderFloatValue w = null!;
+        public string name = string.Empty;
 
         public SerializedShaderVectorValue(BinaryReader reader)
         {
@@ -204,30 +204,30 @@ namespace AssetStudio
 
     public class SerializedShaderState
     {
-        public string m_Name;
-        public SerializedShaderRTBlendState[] rtBlend;
+        public string m_Name = string.Empty;
+        public SerializedShaderRTBlendState[] rtBlend = null!;
         public bool rtSeparateBlend;
-        public SerializedShaderFloatValue zClip;
-        public SerializedShaderFloatValue zTest;
-        public SerializedShaderFloatValue zWrite;
-        public SerializedShaderFloatValue culling;
-        public SerializedShaderFloatValue conservative;
-        public SerializedShaderFloatValue offsetFactor;
-        public SerializedShaderFloatValue offsetUnits;
-        public SerializedShaderFloatValue alphaToMask;
-        public SerializedStencilOp stencilOp;
-        public SerializedStencilOp stencilOpFront;
-        public SerializedStencilOp stencilOpBack;
-        public SerializedShaderFloatValue stencilReadMask;
-        public SerializedShaderFloatValue stencilWriteMask;
-        public SerializedShaderFloatValue stencilRef;
-        public SerializedShaderFloatValue fogStart;
-        public SerializedShaderFloatValue fogEnd;
-        public SerializedShaderFloatValue fogDensity;
-        public SerializedShaderVectorValue fogColor;
+        public SerializedShaderFloatValue? zClip;
+        public SerializedShaderFloatValue zTest = null!;
+        public SerializedShaderFloatValue zWrite = null!;
+        public SerializedShaderFloatValue culling = null!;
+        public SerializedShaderFloatValue? conservative;
+        public SerializedShaderFloatValue offsetFactor = null!;
+        public SerializedShaderFloatValue offsetUnits = null!;
+        public SerializedShaderFloatValue alphaToMask = null!;
+        public SerializedStencilOp stencilOp = null!;
+        public SerializedStencilOp stencilOpFront = null!;
+        public SerializedStencilOp stencilOpBack = null!;
+        public SerializedShaderFloatValue stencilReadMask = null!;
+        public SerializedShaderFloatValue stencilWriteMask = null!;
+        public SerializedShaderFloatValue stencilRef = null!;
+        public SerializedShaderFloatValue fogStart = null!;
+        public SerializedShaderFloatValue fogEnd = null!;
+        public SerializedShaderFloatValue fogDensity = null!;
+        public SerializedShaderVectorValue fogColor = null!;
         public FogMode fogMode;
         public int gpuProgramID;
-        public SerializedTagMap m_Tags;
+        public SerializedTagMap m_Tags = null!;
         public int m_LOD;
         public bool lighting;
 
@@ -290,7 +290,7 @@ namespace AssetStudio
 
     public class ParserBindChannels
     {
-        public ShaderBindChannel[] m_Channels;
+        public ShaderBindChannel[] m_Channels = null!;
         public uint m_SourceMap;
 
         public ParserBindChannels(BinaryReader reader)
@@ -458,9 +458,9 @@ namespace AssetStudio
     public class ConstantBuffer
     {
         public int m_NameIndex;
-        public MatrixParameter[] m_MatrixParams;
-        public VectorParameter[] m_VectorParams;
-        public StructParameter[] m_StructParams;
+        public MatrixParameter[] m_MatrixParams = null!;
+        public VectorParameter[] m_VectorParams = null!;
+        public StructParameter[]? m_StructParams;
         public int m_Size;
         public bool m_IsPartialCB;
 
@@ -559,14 +559,14 @@ namespace AssetStudio
 
     public class SerializedProgramParameters
     {
-        public VectorParameter[] m_VectorParams;
-        public MatrixParameter[] m_MatrixParams;
-        public TextureParameter[] m_TextureParams;
-        public BufferBinding[] m_BufferParams;
-        public ConstantBuffer[] m_ConstantBuffers;
-        public BufferBinding[] m_ConstantBufferBindings;
-        public UAVParameter[] m_UAVParams;
-        public SamplerParameter[] m_Samplers;
+        public VectorParameter[] m_VectorParams = null!;
+        public MatrixParameter[] m_MatrixParams = null!;
+        public TextureParameter[] m_TextureParams = null!;
+        public BufferBinding[] m_BufferParams = null!;
+        public ConstantBuffer[] m_ConstantBuffers = null!;
+        public BufferBinding[] m_ConstantBufferBindings = null!;
+        public UAVParameter[] m_UAVParams = null!;
+        public SamplerParameter[] m_Samplers = null!;
 
         public SerializedProgramParameters(ObjectReader reader)
         {
@@ -631,19 +631,19 @@ namespace AssetStudio
     public class SerializedSubProgram
     {
         public uint m_BlobIndex;
-        public ParserBindChannels m_Channels;
-        public ushort[] m_KeywordIndices;
+        public ParserBindChannels m_Channels = null!;
+        public ushort[]? m_KeywordIndices;
         public sbyte m_ShaderHardwareTier;
         public ShaderGpuProgramType m_GpuProgramType;
-        public SerializedProgramParameters m_Parameters;
-        public VectorParameter[] m_VectorParams;
-        public MatrixParameter[] m_MatrixParams;
-        public TextureParameter[] m_TextureParams;
-        public BufferBinding[] m_BufferParams;
-        public ConstantBuffer[] m_ConstantBuffers;
-        public BufferBinding[] m_ConstantBufferBindings;
-        public UAVParameter[] m_UAVParams;
-        public SamplerParameter[] m_Samplers;
+        public SerializedProgramParameters? m_Parameters;
+        public VectorParameter[]? m_VectorParams;
+        public MatrixParameter[]? m_MatrixParams;
+        public TextureParameter[]? m_TextureParams;
+        public BufferBinding[]? m_BufferParams;
+        public ConstantBuffer[]? m_ConstantBuffers;
+        public BufferBinding[]? m_ConstantBufferBindings;
+        public UAVParameter[]? m_UAVParams;
+        public SamplerParameter[]? m_Samplers;
 
         public SerializedSubProgram(ObjectReader reader)
         {
@@ -758,9 +758,9 @@ namespace AssetStudio
 
     public class SerializedProgram
     {
-        public SerializedSubProgram[] m_SubPrograms;
-        public SerializedProgramParameters m_CommonParameters;
-        public ushort[] m_SerializedKeywordStateMask;
+        public SerializedSubProgram[] m_SubPrograms = null!;
+        public SerializedProgramParameters? m_CommonParameters;
+        public ushort[]? m_SerializedKeywordStateMask;
 
         public SerializedProgram(ObjectReader reader)
         {
@@ -799,26 +799,26 @@ namespace AssetStudio
 
     public class SerializedPass
     {
-        public Hash128[] m_EditorDataHash;
-        public byte[] m_Platforms;
-        public ushort[] m_LocalKeywordMask;
-        public ushort[] m_GlobalKeywordMask;
-        public KeyValuePair<string, int>[] m_NameIndices;
+        public Hash128[]? m_EditorDataHash;
+        public byte[]? m_Platforms;
+        public ushort[]? m_LocalKeywordMask;
+        public ushort[]? m_GlobalKeywordMask;
+        public KeyValuePair<string, int>[] m_NameIndices = null!;
         public PassType m_Type;
-        public SerializedShaderState m_State;
+        public SerializedShaderState m_State = null!;
         public uint m_ProgramMask;
-        public SerializedProgram progVertex;
-        public SerializedProgram progFragment;
-        public SerializedProgram progGeometry;
-        public SerializedProgram progHull;
-        public SerializedProgram progDomain;
-        public SerializedProgram progRayTracing;
+        public SerializedProgram progVertex = null!;
+        public SerializedProgram progFragment = null!;
+        public SerializedProgram progGeometry = null!;
+        public SerializedProgram progHull = null!;
+        public SerializedProgram progDomain = null!;
+        public SerializedProgram? progRayTracing;
         public bool m_HasInstancingVariant;
-        public string m_UseName;
-        public string m_Name;
-        public string m_TextureName;
-        public SerializedTagMap m_Tags;
-        public ushort[] m_SerializedKeywordStateMask;
+        public string m_UseName = string.Empty;
+        public string m_Name = string.Empty;
+        public string m_TextureName = string.Empty;
+        public SerializedTagMap m_Tags = null!;
+        public ushort[]? m_SerializedKeywordStateMask;
 
         public SerializedPass(ObjectReader reader)
         {
@@ -883,7 +883,7 @@ namespace AssetStudio
 
     public class SerializedTagMap
     {
-        public KeyValuePair<string, string>[] tags;
+        public KeyValuePair<string, string>[] tags = null!;
 
         public SerializedTagMap(BinaryReader reader)
         {
@@ -950,8 +950,8 @@ namespace AssetStudio
 
     public class SerializedSubShader
     {
-        public SerializedPass[] m_Passes;
-        public SerializedTagMap m_Tags;
+        public SerializedPass[] m_Passes = null!;
+        public SerializedTagMap m_Tags = null!;
         public int m_LOD;
 
         public SerializedSubShader(ObjectReader reader)
@@ -970,8 +970,8 @@ namespace AssetStudio
 
     public class SerializedShaderDependency
     {
-        public string from;
-        public string to;
+        public string from = string.Empty;
+        public string to = string.Empty;
 
         public SerializedShaderDependency(BinaryReader reader)
         {
@@ -982,8 +982,8 @@ namespace AssetStudio
 
     public class SerializedCustomEditorForRenderPipeline
     {
-        public string customEditorName;
-        public string renderPipelineType;
+        public string customEditorName = string.Empty;
+        public string renderPipelineType = string.Empty;
 
         public SerializedCustomEditorForRenderPipeline(BinaryReader reader)
         {
@@ -994,15 +994,15 @@ namespace AssetStudio
 
     public class SerializedShader
     {
-        public SerializedProperties m_PropInfo;
-        public SerializedSubShader[] m_SubShaders;
-        public string[] m_KeywordNames;
-        public byte[] m_KeywordFlags;
-        public string m_Name;
-        public string m_CustomEditorName;
-        public string m_FallbackName;
-        public SerializedShaderDependency[] m_Dependencies;
-        public SerializedCustomEditorForRenderPipeline[] m_CustomEditorForRenderPipelines;
+        public SerializedProperties m_PropInfo = null!;
+        public SerializedSubShader[] m_SubShaders = null!;
+        public string[]? m_KeywordNames;
+        public byte[]? m_KeywordFlags;
+        public string m_Name = string.Empty;
+        public string m_CustomEditorName = string.Empty;
+        public string m_FallbackName = string.Empty;
+        public SerializedShaderDependency[] m_Dependencies = null!;
+        public SerializedCustomEditorForRenderPipeline[]? m_CustomEditorForRenderPipelines;
         public bool m_DisableNoSubshadersMessage;
 
         public SerializedShader(ObjectReader reader)
@@ -1083,17 +1083,17 @@ namespace AssetStudio
 
     public class Shader : NamedObject
     {
-        public byte[] m_Script;
+        public byte[]? m_Script;
         //5.3 - 5.4
         public uint decompressedSize;
-        public byte[] m_SubProgramBlob;
+        public byte[]? m_SubProgramBlob;
         //5.5 and up
-        public SerializedShader m_ParsedForm;
-        public ShaderCompilerPlatform[] platforms;
-        public uint[][] offsets;
-        public uint[][] compressedLengths;
-        public uint[][] decompressedLengths;
-        public byte[] compressedBlob;
+        public SerializedShader? m_ParsedForm;
+        public ShaderCompilerPlatform[]? platforms;
+        public uint[][]? offsets;
+        public uint[][]? compressedLengths;
+        public uint[][]? decompressedLengths;
+        public byte[]? compressedBlob;
 
         public Shader(ObjectReader reader) : base(reader)
         {

@@ -96,7 +96,7 @@ namespace SevenZip.Compression.LZMA
 				}
 			}
 
-			Decoder2[] m_Coders;
+			Decoder2[] m_Coders = null!;
 			int m_NumPrevBits;
 			int m_NumPosBits;
 			uint m_PosMask;

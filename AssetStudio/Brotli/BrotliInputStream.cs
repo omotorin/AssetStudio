@@ -126,6 +126,7 @@ namespace Org.Brotli.Dec
 		{
 			if (bufferOffset >= remainingBufferBytes)
 			{
+				if (buffer == null) return -1;
 				remainingBufferBytes = Read(buffer, 0, buffer.Length);
 				bufferOffset = 0;
 				if (remainingBufferBytes == -1)
@@ -133,7 +134,7 @@ namespace Org.Brotli.Dec
 					return -1;
 				}
 			}
-			return buffer[bufferOffset++] & unchecked((int)(0xFF));
+			return buffer?[bufferOffset++] & unchecked((int)(0xFF)) ?? -1;
 		}
 
 		/// <summary><inheritDoc/></summary>
@@ -211,7 +212,7 @@ namespace Org.Brotli.Dec
 
 		public override bool CanWrite{get{return false;}}
 		public override System.IAsyncResult BeginWrite(byte[] buffer, int offset,
-				int count, System.AsyncCallback callback, object state) {
+				int count, System.AsyncCallback? callback, object? state) {
 			throw new System.NotSupportedException();
 		}
 		public override void Write(byte[] buffer, int offset, int count) {

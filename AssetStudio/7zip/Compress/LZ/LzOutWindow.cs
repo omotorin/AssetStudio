@@ -45,6 +45,7 @@ namespace SevenZip.Compression.LZ
 			_streamPos = _pos = 0;
 			while (size > 0)
 			{
+				if (_buffer == null) return false;
 				uint curSize = _windowSize - _pos;
 				if (size < curSize)
 					curSize = size;
@@ -79,6 +80,7 @@ namespace SevenZip.Compression.LZ
 
 		public void CopyBlock(uint distance, uint len)
 		{
+			if (_buffer == null) return;
 			uint pos = _pos - distance - 1;
 			if (pos >= _windowSize)
 				pos += _windowSize;
@@ -94,6 +96,7 @@ namespace SevenZip.Compression.LZ
 
 		public void PutByte(byte b)
 		{
+			if (_buffer == null) return;
 			_buffer[_pos++] = b;
 			if (_pos >= _windowSize)
 				Flush();
@@ -101,6 +104,7 @@ namespace SevenZip.Compression.LZ
 
 		public byte GetByte(uint distance)
 		{
+			if (_buffer == null) return 0;
 			uint pos = _pos - distance - 1;
 			if (pos >= _windowSize)
 				pos += _windowSize;

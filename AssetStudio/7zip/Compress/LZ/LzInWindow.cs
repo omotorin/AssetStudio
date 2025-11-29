@@ -31,8 +31,11 @@ namespace SevenZip.Compression.LZ
 			UInt32 numBytes = (UInt32)(_bufferOffset) + _streamPos - offset;
 
 			// check negative offset ????
-			for (UInt32 i = 0; i < numBytes; i++)
-				_bufferBase[i] = _bufferBase[offset + i];
+			if (_bufferBase != null)
+			{
+				for (UInt32 i = 0; i < numBytes; i++)
+					_bufferBase[i] = _bufferBase[offset + i];
+			}
 			_bufferOffset -= offset;
 		}
 
@@ -102,11 +105,16 @@ namespace SevenZip.Compression.LZ
 			}
 		}
 
-		public Byte GetIndexByte(Int32 index) { return _bufferBase[_bufferOffset + _pos + index]; }
+		public Byte GetIndexByte(Int32 index) 
+		{ 
+			if (_bufferBase == null) return 0;
+			return _bufferBase[_bufferOffset + _pos + index]; 
+		}
 
 		// index + limit have not to exceed _keepSizeAfter;
 		public UInt32 GetMatchLen(Int32 index, UInt32 distance, UInt32 limit)
 		{
+			if (_bufferBase == null) return 0;
 			if (_streamEndWasReached)
 				if ((_pos + index) + limit > _streamPos)
 					limit = _streamPos - (UInt32)(_pos + index);

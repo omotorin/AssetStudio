@@ -26,10 +26,10 @@ namespace AssetStudio
         public bool m_Legacy3D;
         public AudioCompressionFormat m_CompressionFormat;
 
-        public string m_Source;
+        public string? m_Source;
         public long m_Offset; //ulong
         public long m_Size; //ulong
-        public ResourceReader m_AudioData;
+        public ResourceReader? m_AudioData;
 
         public AudioClip(ObjectReader reader) : base(reader)
         {

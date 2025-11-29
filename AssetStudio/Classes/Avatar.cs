@@ -17,8 +17,8 @@ namespace AssetStudio
 
     public class Limit
     {
-        public object m_Min;
-        public object m_Max;
+        public object m_Min = null!;
+        public object m_Max = null!;
 
         public Limit(ObjectReader reader)
         {
@@ -40,8 +40,8 @@ namespace AssetStudio
     {
         public Vector4 m_PreQ;
         public Vector4 m_PostQ;
-        public object m_Sgn;
-        public Limit m_Limit;
+        public object m_Sgn = null!;
+        public Limit m_Limit = null!;
         public float m_Length;
         public uint m_Type;
 
@@ -66,9 +66,9 @@ namespace AssetStudio
 
     public class Skeleton
     {
-        public Node[] m_Node;
-        public uint[] m_ID;
-        public Axes[] m_AxesArray;
+        public Node[] m_Node = null!;
+        public uint[] m_ID = null!;
+        public Axes[] m_AxesArray = null!;
 
 
         public Skeleton(ObjectReader reader)
@@ -93,7 +93,7 @@ namespace AssetStudio
 
     public class SkeletonPose
     {
-        public xform[] m_X;
+        public xform[] m_X = null!;
 
         public SkeletonPose(ObjectReader reader)
         {
@@ -108,7 +108,7 @@ namespace AssetStudio
 
     public class Hand
     {
-        public int[] m_HandBoneIndex;
+        public int[] m_HandBoneIndex = null!;
 
         public Hand(ObjectReader reader)
         {
@@ -118,7 +118,7 @@ namespace AssetStudio
 
     public class Handle
     {
-        public xform m_X;
+        public xform m_X = null!;
         public uint m_ParentHumanIndex;
         public uint m_ID;
 
@@ -132,7 +132,7 @@ namespace AssetStudio
 
     public class Collider
     {
-        public xform m_X;
+        public xform m_X = null!;
         public uint m_Type;
         public uint m_XMotionType;
         public uint m_YMotionType;
@@ -158,16 +158,16 @@ namespace AssetStudio
 
     public class Human
     {
-        public xform m_RootX;
-        public Skeleton m_Skeleton;
-        public SkeletonPose m_SkeletonPose;
-        public Hand m_LeftHand;
-        public Hand m_RightHand;
-        public Handle[] m_Handles;
-        public Collider[] m_ColliderArray;
-        public int[] m_HumanBoneIndex;
-        public float[] m_HumanBoneMass;
-        public int[] m_ColliderIndex;
+        public xform m_RootX = null!;
+        public Skeleton m_Skeleton = null!;
+        public SkeletonPose m_SkeletonPose = null!;
+        public Hand m_LeftHand = null!;
+        public Hand m_RightHand = null!;
+        public Handle[]? m_Handles;
+        public Collider[]? m_ColliderArray;
+        public int[] m_HumanBoneIndex = null!;
+        public float[] m_HumanBoneMass = null!;
+        public int[]? m_ColliderIndex;
         public float m_Scale;
         public float m_ArmTwist;
         public float m_ForeArmTwist;
@@ -235,18 +235,18 @@ namespace AssetStudio
 
     public class AvatarConstant
     {
-        public Skeleton m_AvatarSkeleton;
-        public SkeletonPose m_AvatarSkeletonPose;
-        public SkeletonPose m_DefaultPose;
-        public uint[] m_SkeletonNameIDArray;
-        public Human m_Human;
-        public int[] m_HumanSkeletonIndexArray;
-        public int[] m_HumanSkeletonReverseIndexArray;
+        public Skeleton m_AvatarSkeleton = null!;
+        public SkeletonPose m_AvatarSkeletonPose = null!;
+        public SkeletonPose? m_DefaultPose;
+        public uint[]? m_SkeletonNameIDArray;
+        public Human m_Human = null!;
+        public int[] m_HumanSkeletonIndexArray = null!;
+        public int[]? m_HumanSkeletonReverseIndexArray;
         public int m_RootMotionBoneIndex;
-        public xform m_RootMotionBoneX;
-        public Skeleton m_RootMotionSkeleton;
-        public SkeletonPose m_RootMotionSkeletonPose;
-        public int[] m_RootMotionSkeletonIndexArray;
+        public xform m_RootMotionBoneX = null!;
+        public Skeleton? m_RootMotionSkeleton;
+        public SkeletonPose? m_RootMotionSkeletonPose;
+        public int[]? m_RootMotionSkeletonIndexArray;
 
         public AvatarConstant(ObjectReader reader)
         {
@@ -286,8 +286,8 @@ namespace AssetStudio
     public sealed class Avatar : NamedObject
     {
         public uint m_AvatarSize;
-        public AvatarConstant m_Avatar;
-        public KeyValuePair<uint, string>[] m_TOS;
+        public AvatarConstant m_Avatar = null!;
+        public KeyValuePair<uint, string>[] m_TOS = null!;
 
         public Avatar(ObjectReader reader) : base(reader)
         {
@@ -304,7 +304,7 @@ namespace AssetStudio
             //HumanDescription m_HumanDescription 2019 and up
         }
 
-        public string FindBonePath(uint hash)
+        public string? FindBonePath(uint hash)
         {
             return m_TOS.FirstOrDefault(pair => pair.Key == hash).Value;
         }

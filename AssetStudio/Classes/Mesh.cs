@@ -20,18 +20,18 @@ namespace AssetStudio
 
     public class CompressedMesh
     {
-        public PackedFloatVector m_Vertices;
-        public PackedFloatVector m_UV;
-        public PackedFloatVector m_BindPoses;
-        public PackedFloatVector m_Normals;
-        public PackedFloatVector m_Tangents;
-        public PackedIntVector m_Weights;
-        public PackedIntVector m_NormalSigns;
-        public PackedIntVector m_TangentSigns;
-        public PackedFloatVector m_FloatColors;
-        public PackedIntVector m_BoneIndices;
-        public PackedIntVector m_Triangles;
-        public PackedIntVector m_Colors;
+        public PackedFloatVector m_Vertices = null!;
+        public PackedFloatVector m_UV = null!;
+        public PackedFloatVector? m_BindPoses;
+        public PackedFloatVector m_Normals = null!;
+        public PackedFloatVector m_Tangents = null!;
+        public PackedIntVector m_Weights = null!;
+        public PackedIntVector m_NormalSigns = null!;
+        public PackedIntVector m_TangentSigns = null!;
+        public PackedFloatVector? m_FloatColors;
+        public PackedIntVector m_BoneIndices = null!;
+        public PackedIntVector m_Triangles = null!;
+        public PackedIntVector? m_Colors;
         public uint m_UVInfo;
 
         public CompressedMesh(ObjectReader reader)
@@ -123,9 +123,9 @@ namespace AssetStudio
     {
         public uint m_CurrentChannels;
         public uint m_VertexCount;
-        public ChannelInfo[] m_Channels;
-        public StreamInfo[] m_Streams;
-        public byte[] m_DataSize;
+        public ChannelInfo[]? m_Channels;
+        public StreamInfo[] m_Streams = null!;
+        public byte[] m_DataSize = null!;
 
         public VertexData(ObjectReader reader)
         {
@@ -187,6 +187,7 @@ namespace AssetStudio
             {
                 uint chnMask = 0;
                 uint stride = 0;
+                if (m_Channels == null) continue;
                 for (int chn = 0; chn < m_Channels.Length; chn++)
                 {
                     var m_Channel = m_Channels[chn];
@@ -229,6 +230,7 @@ namespace AssetStudio
                 {
                     if (channelMask.Get(i))
                     {
+                        if (m_Channels == null) break;
                         var m_Channel = m_Channels[i];
                         m_Channel.stream = (byte)s;
                         m_Channel.offset = offset;
@@ -262,8 +264,8 @@ namespace AssetStudio
 
     public class BoneWeights4
     {
-        public float[] weight;
-        public int[] boneIndex;
+        public float[] weight = null!;
+        public int[] boneIndex = null!;
 
         public BoneWeights4()
         {
@@ -327,7 +329,7 @@ namespace AssetStudio
 
     public class MeshBlendShapeChannel
     {
-        public string name;
+        public string name = string.Empty;
         public uint nameHash;
         public int frameIndex;
         public int frameCount;
@@ -343,10 +345,10 @@ namespace AssetStudio
 
     public class BlendShapeData
     {
-        public BlendShapeVertex[] vertices;
-        public MeshBlendShape[] shapes;
-        public MeshBlendShapeChannel[] channels;
-        public float[] fullWeights;
+        public BlendShapeVertex[] vertices = null!;
+        public MeshBlendShape[] shapes = null!;
+        public MeshBlendShapeChannel[] channels = null!;
+        public float[]? fullWeights;
 
         public BlendShapeData(ObjectReader reader)
         {
@@ -415,7 +417,7 @@ namespace AssetStudio
         public uint baseVertex;
         public uint firstVertex;
         public uint vertexCount;
-        public AABB localAABB;
+        public AABB? localAABB;
 
         public SubMesh(ObjectReader reader)
         {
@@ -447,28 +449,28 @@ namespace AssetStudio
     public sealed class Mesh : NamedObject
     {
         private bool m_Use16BitIndices = true;
-        public SubMesh[] m_SubMeshes;
-        private uint[] m_IndexBuffer;
-        public BlendShapeData m_Shapes;
-        public Matrix4x4[] m_BindPose;
-        public uint[] m_BoneNameHashes;
+        public SubMesh[] m_SubMeshes = null!;
+        private uint[]? m_IndexBuffer;
+        public BlendShapeData? m_Shapes;
+        public Matrix4x4[]? m_BindPose;
+        public uint[]? m_BoneNameHashes;
         public int m_VertexCount;
-        public float[] m_Vertices;
-        public BoneWeights4[] m_Skin;
-        public float[] m_Normals;
-        public float[] m_Colors;
-        public float[] m_UV0;
-        public float[] m_UV1;
-        public float[] m_UV2;
-        public float[] m_UV3;
-        public float[] m_UV4;
-        public float[] m_UV5;
-        public float[] m_UV6;
-        public float[] m_UV7;
-        public float[] m_Tangents;
-        private VertexData m_VertexData;
-        private CompressedMesh m_CompressedMesh;
-        private StreamingInfo m_StreamData;
+        public float[]? m_Vertices;
+        public BoneWeights4[]? m_Skin;
+        public float[]? m_Normals;
+        public float[]? m_Colors;
+        public float[]? m_UV0;
+        public float[]? m_UV1;
+        public float[]? m_UV2;
+        public float[]? m_UV3;
+        public float[]? m_UV4;
+        public float[]? m_UV5;
+        public float[]? m_UV6;
+        public float[]? m_UV7;
+        public float[]? m_Tangents;
+        private VertexData? m_VertexData;
+        private CompressedMesh? m_CompressedMesh;
+        private StreamingInfo? m_StreamData;
 
         public List<uint> m_Indices = new List<uint>();
 
@@ -684,7 +686,7 @@ namespace AssetStudio
         {
             if (!string.IsNullOrEmpty(m_StreamData?.path))
             {
-                if (m_VertexData.m_VertexCount > 0)
+                if (m_VertexData != null && m_VertexData.m_VertexCount > 0)
                 {
                     var resourceReader = new ResourceReader(m_StreamData.path, assetsFile, m_StreamData.offset, m_StreamData.size);
                     m_VertexData.m_DataSize = resourceReader.GetData();
@@ -705,6 +707,7 @@ namespace AssetStudio
 
         private void ReadVertexData()
         {
+            if (m_VertexData == null || m_VertexData.m_Channels == null) return;
             m_VertexCount = (int)m_VertexData.m_VertexCount;
 
             for (var chn = 0; chn < m_VertexData.m_Channels.Length; chn++)
@@ -800,9 +803,12 @@ namespace AssetStudio
                                     }
                                     for (int i = 0; i < m_VertexCount; i++)
                                     {
-                                        for (int j = 0; j < m_Channel.dimension; j++)
+                                        if (m_Skin != null && componentsFloatArray != null)
                                         {
-                                            m_Skin[i].weight[j] = componentsFloatArray[i * m_Channel.dimension + j];
+                                            for (int j = 0; j < m_Channel.dimension; j++)
+                                            {
+                                                m_Skin[i].weight[j] = componentsFloatArray[i * m_Channel.dimension + j];
+                                            }
                                         }
                                     }
                                     break;
@@ -813,9 +819,12 @@ namespace AssetStudio
                                     }
                                     for (int i = 0; i < m_VertexCount; i++)
                                     {
-                                        for (int j = 0; j < m_Channel.dimension; j++)
+                                        if (m_Skin != null && componentsIntArray != null)
                                         {
-                                            m_Skin[i].boneIndex[j] = componentsIntArray[i * m_Channel.dimension + j];
+                                            for (int j = 0; j < m_Channel.dimension; j++)
+                                            {
+                                                m_Skin[i].boneIndex[j] = componentsIntArray[i * m_Channel.dimension + j];
+                                            }
                                         }
                                     }
                                     break;
@@ -865,6 +874,7 @@ namespace AssetStudio
 
         private void DecompressCompressedMesh()
         {
+            if (m_CompressedMesh == null) return;
             //Vertex
             if (m_CompressedMesh.m_Vertices.m_NumItems > 0)
             {
@@ -906,7 +916,7 @@ namespace AssetStudio
                 }
             }
             //BindPose
-            if (version[0] < 5)
+            if (version[0] < 5 && m_CompressedMesh.m_BindPoses != null)
             {
                 if (m_CompressedMesh.m_BindPoses.m_NumItems > 0)
                 {
@@ -983,7 +993,7 @@ namespace AssetStudio
                 }
             }
             //FloatColor
-            if (version[0] >= 5)
+            if (version[0] >= 5 && m_CompressedMesh.m_FloatColors != null)
             {
                 if (m_CompressedMesh.m_FloatColors.m_NumItems > 0)
                 {
@@ -991,10 +1001,10 @@ namespace AssetStudio
                 }
             }
             //Skin
-            if (m_CompressedMesh.m_Weights.m_NumItems > 0)
+            if (m_CompressedMesh.m_Weights != null && m_CompressedMesh.m_Weights.m_NumItems > 0)
             {
                 var weights = m_CompressedMesh.m_Weights.UnpackInts();
-                var boneIndices = m_CompressedMesh.m_BoneIndices.UnpackInts();
+                var boneIndices = m_CompressedMesh.m_BoneIndices?.UnpackInts();
 
                 InitMSkin();
 
@@ -1003,11 +1013,13 @@ namespace AssetStudio
                 int j = 0;
                 int sum = 0;
 
-                for (int i = 0; i < m_CompressedMesh.m_Weights.m_NumItems; i++)
+                if (m_Skin != null && boneIndices != null)
                 {
-                    //read bone index and weight.
-                    m_Skin[bonePos].weight[j] = weights[i] / 31.0f;
-                    m_Skin[bonePos].boneIndex[j] = boneIndices[boneIndexPos++];
+                    for (int i = 0; i < m_CompressedMesh.m_Weights.m_NumItems; i++)
+                    {
+                        //read bone index and weight.
+                        m_Skin[bonePos].weight[j] = weights[i] / 31.0f;
+                        m_Skin[bonePos].boneIndex[j] = boneIndices[boneIndexPos++];
                     j++;
                     sum += weights[i];
 
@@ -1033,6 +1045,7 @@ namespace AssetStudio
                         j = 0;
                         sum = 0;
                     }
+                    }
                 }
             }
             //IndexBuffer
@@ -1056,6 +1069,7 @@ namespace AssetStudio
 
         private void GetTriangles()
         {
+            if (m_IndexBuffer == null) return;
             foreach (var m_SubMesh in m_SubMeshes)
             {
                 var firstIndex = m_SubMesh.firstByte / 2;
@@ -1168,7 +1182,7 @@ namespace AssetStudio
             }
         }
 
-        public float[] GetUV(int uv)
+        public float[]? GetUV(int uv)
         {
             switch (uv)
             {

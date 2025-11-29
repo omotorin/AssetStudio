@@ -7,9 +7,9 @@ namespace AssetStudio
 {
     public sealed class SkinnedMeshRenderer : Renderer
     {
-        public PPtr<Mesh> m_Mesh;
-        public PPtr<Transform>[] m_Bones;
-        public float[] m_BlendShapeWeights;
+        public PPtr<Mesh> m_Mesh = null!;
+        public PPtr<Transform>[] m_Bones = null!;
+        public float[]? m_BlendShapeWeights;
 
         public SkinnedMeshRenderer(ObjectReader reader) : base(reader)
         {

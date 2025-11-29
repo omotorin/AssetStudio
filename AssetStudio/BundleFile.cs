@@ -157,6 +157,7 @@ namespace AssetStudio
         private void ReadBlocksAndDirectory(EndianBinaryReader reader, Stream blocksStream)
         {
             var isCompressed = m_Header.signature == "UnityWeb";
+            if (m_BlocksInfo == null) return;
             foreach (var blockInfo in m_BlocksInfo)
             {
                 var uncompressedBytes = reader.ReadBytes((int)blockInfo.compressedSize);
@@ -189,6 +190,7 @@ namespace AssetStudio
 
         public void ReadFiles(Stream blocksStream, string path)
         {
+            if (m_DirectoryInfo == null) return;
             fileList = new StreamFile[m_DirectoryInfo.Length];
             for (int i = 0; i < m_DirectoryInfo.Length; i++)
             {
@@ -316,6 +318,7 @@ namespace AssetStudio
 
         private void ReadBlocks(EndianBinaryReader reader, Stream blocksStream)
         {
+            if (m_BlocksInfo == null) return;
             foreach (var blockInfo in m_BlocksInfo)
             {
                 var compressionType = (CompressionType)(blockInfo.flags & StorageBlockFlags.CompressionTypeMask);

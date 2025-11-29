@@ -19,9 +19,9 @@ namespace AssetStudio
 
     public abstract class Renderer : Component
     {
-        public PPtr<Material>[] m_Materials;
-        public StaticBatchInfo m_StaticBatchInfo;
-        public uint[] m_SubsetIndices;
+        public PPtr<Material>[] m_Materials = null!;
+        public StaticBatchInfo? m_StaticBatchInfo;
+        public uint[]? m_SubsetIndices;
 
         protected Renderer(ObjectReader reader) : base(reader)
         {

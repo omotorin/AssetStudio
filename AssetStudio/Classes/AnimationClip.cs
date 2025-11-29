@@ -8,12 +8,12 @@ namespace AssetStudio
     public class Keyframe<T>
     {
         public float time;
-        public T value;
-        public T inSlope;
-        public T outSlope;
+        public T value = default!;
+        public T inSlope = default!;
+        public T outSlope = default!;
         public int weightedMode;
-        public T inWeight;
-        public T outWeight;
+        public T inWeight = default!;
+        public T outWeight = default!;
 
 
         public Keyframe(ObjectReader reader, Func<T> readerFunc)
@@ -33,7 +33,7 @@ namespace AssetStudio
 
     public class AnimationCurve<T>
     {
-        public Keyframe<T>[] m_Curve;
+        public Keyframe<T>[] m_Curve = null!;
         public int m_PreInfinity;
         public int m_PostInfinity;
         public int m_RotationOrder;
@@ -111,8 +111,8 @@ namespace AssetStudio
 
     public class QuaternionCurve
     {
-        public AnimationCurve<Quaternion> curve;
-        public string path;
+        public AnimationCurve<Quaternion> curve = null!;
+        public string path = string.Empty;
 
         public QuaternionCurve(ObjectReader reader)
         {
@@ -126,7 +126,7 @@ namespace AssetStudio
         public uint m_NumItems;
         public float m_Range;
         public float m_Start;
-        public byte[] m_Data;
+        public byte[] m_Data = null!;
         public byte m_BitSize;
 
         public PackedFloatVector(ObjectReader reader)
@@ -185,7 +185,7 @@ namespace AssetStudio
     public class PackedIntVector
     {
         public uint m_NumItems;
-        public byte[] m_Data;
+        public byte[] m_Data = null!;
         public byte m_BitSize;
 
         public PackedIntVector(ObjectReader reader)
@@ -230,7 +230,7 @@ namespace AssetStudio
     public class PackedQuatVector
     {
         public uint m_NumItems;
-        public byte[] m_Data;
+        public byte[] m_Data = null!;
 
         public PackedQuatVector(ObjectReader reader)
         {
@@ -309,10 +309,10 @@ namespace AssetStudio
 
     public class CompressedAnimationCurve
     {
-        public string m_Path;
-        public PackedIntVector m_Times;
-        public PackedQuatVector m_Values;
-        public PackedFloatVector m_Slopes;
+        public string m_Path = string.Empty;
+        public PackedIntVector m_Times = null!;
+        public PackedQuatVector m_Values = null!;
+        public PackedFloatVector m_Slopes = null!;
         public int m_PreInfinity;
         public int m_PostInfinity;
 
@@ -329,8 +329,8 @@ namespace AssetStudio
 
     public class Vector3Curve
     {
-        public AnimationCurve<Vector3> curve;
-        public string path;
+        public AnimationCurve<Vector3> curve = null!;
+        public string path = string.Empty;
 
         public Vector3Curve(ObjectReader reader)
         {
@@ -341,11 +341,11 @@ namespace AssetStudio
 
     public class FloatCurve
     {
-        public AnimationCurve<float> curve;
-        public string attribute;
-        public string path;
+        public AnimationCurve<float> curve = null!;
+        public string attribute = string.Empty;
+        public string path = string.Empty;
         public ClassIDType classID;
-        public PPtr<MonoScript> script;
+        public PPtr<MonoScript> script = null!;
 
 
         public FloatCurve(ObjectReader reader)
@@ -361,7 +361,7 @@ namespace AssetStudio
     public class PPtrKeyframe
     {
         public float time;
-        public PPtr<Object> value;
+        public PPtr<Object> value = null!;
 
 
         public PPtrKeyframe(ObjectReader reader)
@@ -373,11 +373,11 @@ namespace AssetStudio
 
     public class PPtrCurve
     {
-        public PPtrKeyframe[] curve;
-        public string attribute;
-        public string path;
+        public PPtrKeyframe[] curve = null!;
+        public string attribute = string.Empty;
+        public string path = string.Empty;
         public int classID;
-        public PPtr<MonoScript> script;
+        public PPtr<MonoScript> script = null!;
 
 
         public PPtrCurve(ObjectReader reader)
@@ -408,7 +408,9 @@ namespace AssetStudio
         }
     }
 
+#pragma warning disable CS8981 // Имя типа содержит только строчные символы ASCII
     public class xform
+#pragma warning restore CS8981
     {
         public Vector3 t;
         public Quaternion q;
@@ -425,8 +427,8 @@ namespace AssetStudio
 
     public class HandPose
     {
-        public xform m_GrabX;
-        public float[] m_DoFArray;
+        public xform m_GrabX = null!;
+        public float[] m_DoFArray = null!;
         public float m_Override;
         public float m_CloseOpen;
         public float m_InOut;
@@ -445,7 +447,7 @@ namespace AssetStudio
 
     public class HumanGoal
     {
-        public xform m_X;
+        public xform m_X = null!;
         public float m_WeightT;
         public float m_WeightR;
         public Vector3 m_HintT;
@@ -467,14 +469,14 @@ namespace AssetStudio
 
     public class HumanPose
     {
-        public xform m_RootX;
+        public xform m_RootX = null!;
         public Vector3 m_LookAtPosition;
         public Vector4 m_LookAtWeight;
-        public HumanGoal[] m_GoalArray;
-        public HandPose m_LeftHandPose;
-        public HandPose m_RightHandPose;
-        public float[] m_DoFArray;
-        public Vector3[] m_TDoFArray;
+        public HumanGoal[] m_GoalArray = null!;
+        public HandPose m_LeftHandPose = null!;
+        public HandPose m_RightHandPose = null!;
+        public float[] m_DoFArray = null!;
+        public Vector3[]? m_TDoFArray;
 
         public HumanPose(ObjectReader reader)
         {
@@ -509,7 +511,7 @@ namespace AssetStudio
 
     public class StreamedClip
     {
-        public uint[] data;
+        public uint[] data = null!;
         public uint curveCount;
 
         public StreamedClip(ObjectReader reader)
@@ -521,7 +523,7 @@ namespace AssetStudio
         public class StreamedCurveKey
         {
             public int index;
-            public float[] coeff;
+            public float[] coeff = null!;
 
             public float value;
             public float outSlope;
@@ -556,7 +558,7 @@ namespace AssetStudio
         public class StreamedFrame
         {
             public float time;
-            public StreamedCurveKey[] keyList;
+            public StreamedCurveKey[] keyList = null!;
 
             public StreamedFrame(BinaryReader reader)
             {
@@ -611,7 +613,7 @@ namespace AssetStudio
         public uint m_CurveCount;
         public float m_SampleRate;
         public float m_BeginTime;
-        public float[] m_SampleArray;
+        public float[] m_SampleArray = null!;
 
         public DenseClip(ObjectReader reader)
         {
@@ -625,7 +627,7 @@ namespace AssetStudio
 
     public class ConstantClip
     {
-        public float[] data;
+        public float[] data = null!;
 
         public ConstantClip(ObjectReader reader)
         {
@@ -655,7 +657,7 @@ namespace AssetStudio
 
     public class ValueArrayConstant
     {
-        public ValueConstant[] m_ValueArray;
+        public ValueConstant[] m_ValueArray = null!;
 
         public ValueArrayConstant(ObjectReader reader)
         {
@@ -670,10 +672,10 @@ namespace AssetStudio
 
     public class Clip
     {
-        public StreamedClip m_StreamedClip;
-        public DenseClip m_DenseClip;
-        public ConstantClip m_ConstantClip;
-        public ValueArrayConstant m_Binding;
+        public StreamedClip m_StreamedClip = null!;
+        public DenseClip m_DenseClip = null!;
+        public ConstantClip? m_ConstantClip;
+        public ValueArrayConstant? m_Binding;
 
         public Clip(ObjectReader reader)
         {
@@ -695,6 +697,7 @@ namespace AssetStudio
             var bindings = new AnimationClipBindingConstant();
             var genericBindings = new List<GenericBinding>();
             var values = m_Binding;
+            if (values == null) return bindings;
             for (int i = 0; i < values.m_ValueArray.Length;)
             {
                 var curveID = values.m_ValueArray[i].m_ID;
@@ -749,24 +752,24 @@ namespace AssetStudio
 
     public class ClipMuscleConstant
     {
-        public HumanPose m_DeltaPose;
-        public xform m_StartX;
-        public xform m_StopX;
-        public xform m_LeftFootStartX;
-        public xform m_RightFootStartX;
-        public xform m_MotionStartX;
-        public xform m_MotionStopX;
+        public HumanPose m_DeltaPose = null!;
+        public xform m_StartX = null!;
+        public xform? m_StopX;
+        public xform m_LeftFootStartX = null!;
+        public xform m_RightFootStartX = null!;
+        public xform? m_MotionStartX;
+        public xform? m_MotionStopX;
         public Vector3 m_AverageSpeed;
-        public Clip m_Clip;
+        public Clip m_Clip = null!;
         public float m_StartTime;
         public float m_StopTime;
         public float m_OrientationOffsetY;
         public float m_Level;
         public float m_CycleOffset;
         public float m_AverageAngularSpeed;
-        public int[] m_IndexArray;
-        public ValueDelta[] m_ValueArrayDelta;
-        public float[] m_ValueArrayReferencePose;
+        public int[] m_IndexArray = null!;
+        public ValueDelta[] m_ValueArrayDelta = null!;
+        public float[]? m_ValueArrayReferencePose;
         public bool m_Mirror;
         public bool m_LoopTime;
         public bool m_LoopBlend;
@@ -845,7 +848,7 @@ namespace AssetStudio
     {
         public uint path;
         public uint attribute;
-        public PPtr<Object> script;
+        public PPtr<Object> script = null!;
         public ClassIDType typeID;
         public byte customType;
         public byte isPPtrCurve;
@@ -879,8 +882,8 @@ namespace AssetStudio
 
     public class AnimationClipBindingConstant
     {
-        public GenericBinding[] genericBindings;
-        public PPtr<Object>[] pptrCurveMapping;
+        public GenericBinding[] genericBindings = null!;
+        public PPtr<Object>[] pptrCurveMapping = null!;
 
         public AnimationClipBindingConstant() { }
 
@@ -901,7 +904,7 @@ namespace AssetStudio
             }
         }
 
-        public GenericBinding FindBinding(int index)
+        public GenericBinding? FindBinding(int index)
         {
             int curves = 0;
             foreach (var b in genericBindings)
@@ -940,9 +943,9 @@ namespace AssetStudio
     public class AnimationEvent
     {
         public float time;
-        public string functionName;
-        public string data;
-        public PPtr<Object> objectReferenceParameter;
+        public string functionName = string.Empty;
+        public string data = string.Empty;
+        public PPtr<Object> objectReferenceParameter = null!;
         public float floatParameter;
         public int intParameter;
         public int messageOptions;
@@ -977,20 +980,20 @@ namespace AssetStudio
         public bool m_Legacy;
         public bool m_Compressed;
         public bool m_UseHighQualityCurve;
-        public QuaternionCurve[] m_RotationCurves;
-        public CompressedAnimationCurve[] m_CompressedRotationCurves;
-        public Vector3Curve[] m_EulerCurves;
-        public Vector3Curve[] m_PositionCurves;
-        public Vector3Curve[] m_ScaleCurves;
-        public FloatCurve[] m_FloatCurves;
-        public PPtrCurve[] m_PPtrCurves;
+        public QuaternionCurve[] m_RotationCurves = null!;
+        public CompressedAnimationCurve[] m_CompressedRotationCurves = null!;
+        public Vector3Curve[]? m_EulerCurves;
+        public Vector3Curve[] m_PositionCurves = null!;
+        public Vector3Curve[] m_ScaleCurves = null!;
+        public FloatCurve[] m_FloatCurves = null!;
+        public PPtrCurve[] m_PPtrCurves = null!;
         public float m_SampleRate;
         public int m_WrapMode;
-        public AABB m_Bounds;
+        public AABB? m_Bounds;
         public uint m_MuscleClipSize;
-        public ClipMuscleConstant m_MuscleClip;
-        public AnimationClipBindingConstant m_ClipBindingConstant;
-        public AnimationEvent[] m_Events;
+        public ClipMuscleConstant? m_MuscleClip;
+        public AnimationClipBindingConstant? m_ClipBindingConstant;
+        public AnimationEvent[] m_Events = null!;
 
 
         public AnimationClip(ObjectReader reader) : base(reader)

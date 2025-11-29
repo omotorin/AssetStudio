@@ -14,7 +14,7 @@ namespace AssetStudio
         public string originalPath = string.Empty;
         public string fileName = string.Empty;
         public int[] version = { 0, 0, 0, 0 };
-        public BuildType buildType = BuildType.Unknown;
+        public BuildType? buildType;
         public List<Object> Objects = null!;
         public Dictionary<long, Object> ObjectsDic = null!;
 

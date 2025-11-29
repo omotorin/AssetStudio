@@ -12,14 +12,14 @@ namespace Org.Brotli.Dec
 		private int alphabetSize;
 
 		/// <summary>Storage for Huffman lookup tables.</summary>
-		internal int[] codes;
+		internal int[] codes = null!;
 
 		/// <summary>
 		/// Offsets of distinct lookup tables in
 		/// <see cref="codes"/>
 		/// storage.
 		/// </summary>
-		internal int[] trees;
+		internal int[] trees = null!;
 
 		/// <summary>Initializes the Huffman tree group.</summary>
 		/// <param name="group">POJO to be initialised</param>

@@ -75,6 +75,7 @@ namespace Org.Brotli.Dec
 			{
 				while (bytesRead < ByteReadSize)
 				{
+					if (br.input == null) break;
 					int len = br.input.Read(br.byteBuffer, bytesRead, ByteReadSize - bytesRead);
 					// EOF is -1 in Java, but 0 in C#.
 					if (len <= 0)
@@ -172,7 +173,7 @@ namespace Org.Brotli.Dec
 		/// <exception cref="System.IO.IOException"/>
 		internal static void Close(Org.Brotli.Dec.BitReader br)
 		{
-			System.IO.Stream @is = br.input;
+			System.IO.Stream? @is = br.input;
 			br.input = null;
 			if (@is != null)
 			{
@@ -251,6 +252,7 @@ namespace Org.Brotli.Dec
 			// Now it is possible to copy bytes directly.
 			try
 			{
+				if (br.input == null) return;
 				while (length > 0)
 				{
 					int len = br.input.Read(data, offset, length);

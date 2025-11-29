@@ -12,8 +12,8 @@ namespace AssetStudio
         public Vector2 atlasRectOffset;
         public Vector4 uvTransform;
         public float downscaleMultiplier;
-        public SpriteSettings settingsRaw;
-        public SecondarySpriteTexture[] secondaryTextures;
+        public SpriteSettings settingsRaw = null!;
+        public SecondarySpriteTexture[]? secondaryTextures;
 
         public SpriteAtlasData(ObjectReader reader)
         {

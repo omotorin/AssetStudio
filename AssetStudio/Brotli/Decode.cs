@@ -3,6 +3,7 @@
 Distributed under MIT license.
 See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
 */
+using System;
 namespace Org.Brotli.Dec
 {
 	/// <summary>API for Brotli decompression.</summary>
@@ -511,12 +512,12 @@ namespace Org.Brotli.Dec
 				return;
 			}
 			// TODO: Reset? Do we need this?
-			state.hGroup0.codes = null;
-			state.hGroup0.trees = null;
-			state.hGroup1.codes = null;
-			state.hGroup1.trees = null;
-			state.hGroup2.codes = null;
-			state.hGroup2.trees = null;
+			state.hGroup0.codes = Array.Empty<int>();
+			state.hGroup0.trees = Array.Empty<int>();
+			state.hGroup1.codes = Array.Empty<int>();
+			state.hGroup1.trees = Array.Empty<int>();
+			state.hGroup2.codes = Array.Empty<int>();
+			state.hGroup2.trees = Array.Empty<int>();
 			Org.Brotli.Dec.BitReader.ReadMoreInput(br);
 			DecodeMetaBlockLength(br, state);
 			if (state.metaBlockLength == 0 && !state.isMetadata)

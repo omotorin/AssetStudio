@@ -59,9 +59,9 @@ namespace AssetStudio
         public TextureFormat m_TextureFormat;
         public bool m_MipMap;
         public int m_MipCount;
-        public GLTextureSettings m_TextureSettings;
-        public ResourceReader image_data;
-        public StreamingInfo m_StreamData;
+        public GLTextureSettings m_TextureSettings = null!;
+        public ResourceReader? image_data;
+        public StreamingInfo? m_StreamData;
 
         public Texture2D(ObjectReader reader) : base(reader)
         {
@@ -132,7 +132,7 @@ namespace AssetStudio
             }
 
             ResourceReader resourceReader;
-            if (!string.IsNullOrEmpty(m_StreamData?.path))
+            if (!string.IsNullOrEmpty(m_StreamData?.path) && m_StreamData != null)
             {
                 resourceReader = new ResourceReader(m_StreamData.path, assetsFile, m_StreamData.offset, m_StreamData.size);
             }

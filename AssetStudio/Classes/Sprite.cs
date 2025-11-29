@@ -6,8 +6,8 @@ namespace AssetStudio
 {
     public class SecondarySpriteTexture
     {
-        public PPtr<Texture2D> texture;
-        public string name;
+        public PPtr<Texture2D> texture = null!;
+        public string name = string.Empty;
 
         public SecondarySpriteTexture(ObjectReader reader)
         {
@@ -77,20 +77,20 @@ namespace AssetStudio
 
     public class SpriteRenderData
     {
-        public PPtr<Texture2D> texture;
-        public PPtr<Texture2D> alphaTexture;
-        public SecondarySpriteTexture[] secondaryTextures;
-        public SubMesh[] m_SubMeshes;
-        public byte[] m_IndexBuffer;
-        public VertexData m_VertexData;
-        public SpriteVertex[] vertices;
-        public ushort[] indices;
-        public Matrix4x4[] m_Bindpose;
-        public BoneWeights4[] m_SourceSkin;
-        public Rectf textureRect;
+        public PPtr<Texture2D> texture = null!;
+        public PPtr<Texture2D>? alphaTexture;
+        public SecondarySpriteTexture[]? secondaryTextures;
+        public SubMesh[]? m_SubMeshes;
+        public byte[]? m_IndexBuffer;
+        public VertexData? m_VertexData;
+        public SpriteVertex[]? vertices;
+        public ushort[]? indices;
+        public Matrix4x4[]? m_Bindpose;
+        public BoneWeights4[]? m_SourceSkin;
+        public Rectf textureRect = null!;
         public Vector2 textureRectOffset;
         public Vector2 atlasRectOffset;
-        public SpriteSettings settingsRaw;
+        public SpriteSettings settingsRaw = null!;
         public Vector4 uvTransform;
         public float downscaleMultiplier;
 
@@ -148,9 +148,12 @@ namespace AssetStudio
                 if (version[0] == 2018 && version[1] < 2) //2018.2 down
                 {
                     var m_SourceSkinSize = reader.ReadInt32();
-                    for (int i = 0; i < m_SourceSkinSize; i++)
+                    if (m_SourceSkin != null)
                     {
-                        m_SourceSkin[i] = new BoneWeights4(reader);
+                        for (int i = 0; i < m_SourceSkinSize && i < m_SourceSkin.Length; i++)
+                        {
+                            m_SourceSkin[i] = new BoneWeights4(reader);
+                        }
                     }
                 }
             }
@@ -193,7 +196,7 @@ namespace AssetStudio
 
     public sealed class Sprite : NamedObject
     {
-        public Rectf m_Rect;
+        public Rectf m_Rect = null!;
         public Vector2 m_Offset;
         public Vector4 m_Border;
         public float m_PixelsToUnits;
@@ -201,10 +204,10 @@ namespace AssetStudio
         public uint m_Extrude;
         public bool m_IsPolygon;
         public KeyValuePair<Guid, long> m_RenderDataKey;
-        public string[] m_AtlasTags;
-        public PPtr<SpriteAtlas> m_SpriteAtlas;
-        public SpriteRenderData m_RD;
-        public Vector2[][] m_PhysicsShape;
+        public string[]? m_AtlasTags;
+        public PPtr<SpriteAtlas>? m_SpriteAtlas;
+        public SpriteRenderData m_RD = null!;
+        public Vector2[][]? m_PhysicsShape;
 
         public Sprite(ObjectReader reader) : base(reader)
         {

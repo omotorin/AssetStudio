@@ -18,10 +18,10 @@ namespace AssetStudio
 
     public class UnityPropertySheet
     {
-        public KeyValuePair<string, UnityTexEnv>[] m_TexEnvs;
-        public KeyValuePair<string, int>[] m_Ints;
-        public KeyValuePair<string, float>[] m_Floats;
-        public KeyValuePair<string, Color>[] m_Colors;
+        public KeyValuePair<string, UnityTexEnv>[] m_TexEnvs = null!;
+        public KeyValuePair<string, int>[] m_Ints = null!;
+        public KeyValuePair<string, float>[] m_Floats = null!;
+        public KeyValuePair<string, Color>[] m_Colors = null!;
 
         public UnityPropertySheet(ObjectReader reader)
         {

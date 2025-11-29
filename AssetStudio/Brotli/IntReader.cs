@@ -8,9 +8,9 @@ namespace Org.Brotli.Dec
 	/// <summary>Byte-to-int conversion magic.</summary>
 	internal sealed class IntReader
 	{
-		private byte[] byteBuffer;
+		private byte[] byteBuffer = null!;
 
-		private int[] intBuffer;
+		private int[] intBuffer = null!;
 
 		internal static void Init(Org.Brotli.Dec.IntReader ir, byte[] byteBuffer, int[] intBuffer)
 		{

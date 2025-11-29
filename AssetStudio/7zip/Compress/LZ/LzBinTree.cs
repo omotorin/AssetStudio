@@ -10,8 +10,8 @@ namespace SevenZip.Compression.LZ
 		UInt32 _cyclicBufferSize = 0;
 		UInt32 _matchMaxLen;
 
-		UInt32[] _son;
-		UInt32[] _hash;
+		UInt32[] _son = null!;
+		UInt32[] _hash = null!;
 
 		UInt32 _cutValue = 0xFF;
 		UInt32 _hashMask;
@@ -136,6 +136,7 @@ namespace SevenZip.Compression.LZ
 			UInt32 maxLen = kStartMaxLen; // to avoid items for len < hashSize;
 			UInt32 hashValue, hash2Value = 0, hash3Value = 0;
 
+			if (_bufferBase == null) return 0;
 			if (HASH_ARRAY)
 			{
 				UInt32 temp = CRC.Table[_bufferBase[cur]] ^ _bufferBase[cur + 1];
@@ -271,6 +272,7 @@ namespace SevenZip.Compression.LZ
 
 				UInt32 hashValue;
 
+				if (_bufferBase == null) return;
 				if (HASH_ARRAY)
 				{
 					UInt32 temp = CRC.Table[_bufferBase[cur]] ^ _bufferBase[cur + 1];

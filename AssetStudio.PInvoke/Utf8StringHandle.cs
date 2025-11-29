@@ -54,7 +54,7 @@ namespace AssetStudio.PInvoke
         {
             if (lpstr == IntPtr.Zero || lpstr == new IntPtr(-1))
             {
-                return null;
+                return null!;
             }
 
             var byteCount = 0;

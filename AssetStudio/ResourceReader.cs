@@ -5,11 +5,11 @@ namespace AssetStudio
     public class ResourceReader
     {
         private bool needSearch;
-        private string path;
-        private SerializedFile assetsFile;
+        private string path = string.Empty;
+        private SerializedFile? assetsFile;
         private long offset;
         private long size;
-        private BinaryReader reader;
+        private BinaryReader? reader;
 
         public int Size { get => (int)size; }
 
@@ -34,12 +34,13 @@ namespace AssetStudio
             if (needSearch)
             {
                 var resourceFileName = Path.GetFileName(path);
-                if (assetsFile.assetsManager.resourceFileReaders.TryGetValue(resourceFileName, out reader))
+                if (assetsFile != null && assetsFile.assetsManager.resourceFileReaders.TryGetValue(resourceFileName, out reader))
                 {
                     needSearch = false;
                     return reader;
                 }
-                var assetsFileDirectory = Path.GetDirectoryName(assetsFile.fullName);
+                var assetsFileDirectory = assetsFile != null ? Path.GetDirectoryName(assetsFile.fullName) : null;
+                if (assetsFileDirectory == null) throw new FileNotFoundException($"Can't find the resource file {resourceFileName}");
                 var resourceFilePath = Path.Combine(assetsFileDirectory, resourceFileName);
                 if (!File.Exists(resourceFilePath))
                 {
@@ -53,14 +54,17 @@ namespace AssetStudio
                 {
                     needSearch = false;
                     reader = new BinaryReader(File.OpenRead(resourceFilePath));
-                    assetsFile.assetsManager.resourceFileReaders.Add(resourceFileName, reader);
+                    if (assetsFile != null)
+                    {
+                        assetsFile.assetsManager.resourceFileReaders.Add(resourceFileName, reader);
+                    }
                     return reader;
                 }
                 throw new FileNotFoundException($"Can't find the resource file {resourceFileName}");
             }
             else
             {
-                return reader;
+                return reader ?? throw new System.InvalidOperationException("Reader is not initialized");
             }
         }
 
