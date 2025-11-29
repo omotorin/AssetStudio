@@ -4,10 +4,10 @@ namespace SevenZip.Buffer
 {
 	public class OutBuffer
 	{
-		byte[] m_Buffer;
+		byte[] m_Buffer = null!;
 		uint m_Pos;
 		uint m_BufferSize;
-		System.IO.Stream m_Stream;
+		System.IO.Stream? m_Stream;
 		ulong m_ProcessedSize;
 
 		public OutBuffer(uint bufferSize)
@@ -17,8 +17,8 @@ namespace SevenZip.Buffer
 		}
 
 		public void SetStream(System.IO.Stream stream) { m_Stream = stream; }
-		public void FlushStream() { m_Stream.Flush(); }
-		public void CloseStream() { m_Stream.Close(); }
+		public void FlushStream() { m_Stream?.Flush(); }
+		public void CloseStream() { m_Stream?.Close(); }
 		public void ReleaseStream() { m_Stream = null; }
 
 		public void Init()
@@ -38,7 +38,7 @@ namespace SevenZip.Buffer
 		{
 			if (m_Pos == 0)
 				return;
-			m_Stream.Write(m_Buffer, 0, (int)m_Pos);
+			m_Stream?.Write(m_Buffer, 0, (int)m_Pos);
 			m_Pos = 0;
 		}
 

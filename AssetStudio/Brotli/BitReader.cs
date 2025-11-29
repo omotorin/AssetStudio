@@ -28,7 +28,7 @@ namespace Org.Brotli.Dec
 
 		private readonly Org.Brotli.Dec.IntReader intReader = new Org.Brotli.Dec.IntReader();
 
-		private System.IO.Stream input;
+		private System.IO.Stream? input;
 
 		/// <summary>Input stream is finished.</summary>
 		private bool endOfStreamReached;

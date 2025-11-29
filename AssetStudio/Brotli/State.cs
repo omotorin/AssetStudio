@@ -13,7 +13,7 @@ namespace Org.Brotli.Dec
 
 		internal readonly Org.Brotli.Dec.BitReader br = new Org.Brotli.Dec.BitReader();
 
-		internal byte[] ringBuffer;
+		internal byte[] ringBuffer = null!;
 
 		internal readonly int[] blockTypeTrees = new int[3 * Org.Brotli.Dec.Huffman.HuffmanMaxTableSize];
 
@@ -57,9 +57,9 @@ namespace Org.Brotli.Dec
 
 		internal int insertLength;
 
-		internal byte[] contextModes;
+		internal byte[] contextModes = null!;
 
-		internal byte[] contextMap;
+		internal byte[] contextMap = null!;
 
 		internal int contextMapSlice;
 
@@ -73,7 +73,7 @@ namespace Org.Brotli.Dec
 
 		internal int distanceCode;
 
-		internal byte[] distContextMap;
+		internal byte[] distContextMap = null!;
 
 		internal int numDirectDistanceCodes;
 
@@ -109,7 +109,7 @@ namespace Org.Brotli.Dec
 
 		internal int bytesToWrite;
 
-		internal byte[] output;
+		internal byte[] output = null!;
 
 		// Current meta-block header information.
 		// TODO: Update to current spec.

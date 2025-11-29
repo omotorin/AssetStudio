@@ -4,11 +4,11 @@ namespace SevenZip.Compression.LZ
 {
 	public class OutWindow
 	{
-		byte[] _buffer = null;
+		byte[]? _buffer;
 		uint _pos;
 		uint _windowSize = 0;
 		uint _streamPos;
-		System.IO.Stream _stream;
+		System.IO.Stream? _stream;
 
 		public uint TrainSize = 0;
 
@@ -69,7 +69,7 @@ namespace SevenZip.Compression.LZ
 		public void Flush()
 		{
 			uint size = _pos - _streamPos;
-			if (size == 0)
+			if (size == 0 || _stream == null || _buffer == null)
 				return;
 			_stream.Write(_buffer, (int)_streamPos, (int)size);
 			if (_pos >= _windowSize)

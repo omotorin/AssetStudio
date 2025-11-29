@@ -6,7 +6,7 @@ namespace SevenZip.Compression.RangeCoder
 	{
 		public const uint kTopValue = (1 << 24);
 
-		System.IO.Stream Stream;
+		System.IO.Stream? Stream;
 
 		public UInt64 Low;
 		public uint Range;
@@ -27,7 +27,7 @@ namespace SevenZip.Compression.RangeCoder
 
 		public void Init()
 		{
-			StartPosition = Stream.Position;
+			StartPosition = Stream?.Position ?? 0;
 
 			Low = 0;
 			Range = 0xFFFFFFFF;
