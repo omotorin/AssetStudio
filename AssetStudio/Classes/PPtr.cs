@@ -7,7 +7,7 @@ namespace AssetStudio
         public int m_FileID;
         public long m_PathID;
 
-        private SerializedFile assetsFile;
+        private SerializedFile assetsFile = null!;
         private int index = -2; //-2 - Prepare, -1 - Missing
 
         public PPtr(ObjectReader reader)
@@ -17,7 +17,7 @@ namespace AssetStudio
             assetsFile = reader.assetsFile;
         }
 
-        private bool TryGetAssetsFile(out SerializedFile result)
+        private bool TryGetAssetsFile(out SerializedFile? result)
         {
             result = null;
             if (m_FileID == 0)
@@ -53,11 +53,11 @@ namespace AssetStudio
             return false;
         }
 
-        public bool TryGet(out T result)
+        public bool TryGet(out T? result)
         {
             if (TryGetAssetsFile(out var sourceFile))
             {
-                if (sourceFile.ObjectsDic.TryGetValue(m_PathID, out var obj))
+                if (sourceFile != null && sourceFile.ObjectsDic.TryGetValue(m_PathID, out var obj))
                 {
                     if (obj is T variable)
                     {
@@ -71,11 +71,11 @@ namespace AssetStudio
             return false;
         }
 
-        public bool TryGet<T2>(out T2 result) where T2 : Object
+        public bool TryGet<T2>(out T2? result) where T2 : Object
         {
             if (TryGetAssetsFile(out var sourceFile))
             {
-                if (sourceFile.ObjectsDic.TryGetValue(m_PathID, out var obj))
+                if (sourceFile != null && sourceFile.ObjectsDic.TryGetValue(m_PathID, out var obj))
                 {
                     if (obj is T2 variable)
                     {

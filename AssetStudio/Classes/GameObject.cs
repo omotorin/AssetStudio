@@ -7,15 +7,15 @@ namespace AssetStudio
 {
     public sealed class GameObject : EditorExtension
     {
-        public PPtr<Component>[] m_Components;
-        public string m_Name;
+        public PPtr<Component>[] m_Components = null!;
+        public string m_Name = string.Empty;
 
-        public Transform m_Transform;
-        public MeshRenderer m_MeshRenderer;
-        public MeshFilter m_MeshFilter;
-        public SkinnedMeshRenderer m_SkinnedMeshRenderer;
-        public Animator m_Animator;
-        public Animation m_Animation;
+        public Transform? m_Transform;
+        public MeshRenderer? m_MeshRenderer;
+        public MeshFilter? m_MeshFilter;
+        public SkinnedMeshRenderer? m_SkinnedMeshRenderer;
+        public Animator? m_Animator;
+        public Animation? m_Animation;
 
         public GameObject(ObjectReader reader) : base(reader)
         {

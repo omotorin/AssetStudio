@@ -7,7 +7,7 @@ namespace AssetStudio
 {
     public class NamedObject : EditorExtension
     {
-        public string m_Name;
+        public string m_Name = string.Empty;
 
         protected NamedObject(ObjectReader reader) : base(reader)
         {

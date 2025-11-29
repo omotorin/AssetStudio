@@ -4,14 +4,14 @@ namespace AssetStudio
 {
     public class Object
     {
-        public SerializedFile assetsFile;
-        public ObjectReader reader;
+        public SerializedFile assetsFile = null!;
+        public ObjectReader reader = null!;
         public long m_PathID;
-        public int[] version;
+        public int[] version = null!;
         protected BuildType buildType;
         public BuildTarget platform;
         public ClassIDType type;
-        public SerializedType serializedType;
+        public SerializedType? serializedType;
         public uint byteSize;
 
         public Object(ObjectReader reader)
@@ -33,7 +33,7 @@ namespace AssetStudio
             }
         }
 
-        public string Dump()
+        public string? Dump()
         {
             if (serializedType?.m_Type != null)
             {
@@ -42,7 +42,7 @@ namespace AssetStudio
             return null;
         }
 
-        public string Dump(TypeTree m_Type)
+        public string? Dump(TypeTree m_Type)
         {
             if (m_Type != null)
             {
@@ -51,7 +51,7 @@ namespace AssetStudio
             return null;
         }
 
-        public OrderedDictionary ToType()
+        public OrderedDictionary? ToType()
         {
             if (serializedType?.m_Type != null)
             {
@@ -60,7 +60,7 @@ namespace AssetStudio
             return null;
         }
 
-        public OrderedDictionary ToType(TypeTree m_Type)
+        public OrderedDictionary? ToType(TypeTree m_Type)
         {
             if (m_Type != null)
             {
