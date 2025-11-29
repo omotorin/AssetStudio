@@ -10,26 +10,26 @@ namespace AssetStudio
     {
         public AssetsManager assetsManager;
         public FileReader reader;
-        public string fullName;
-        public string originalPath;
-        public string fileName;
+        public string fullName = string.Empty;
+        public string originalPath = string.Empty;
+        public string fileName = string.Empty;
         public int[] version = { 0, 0, 0, 0 };
-        public BuildType buildType;
-        public List<Object> Objects;
-        public Dictionary<long, Object> ObjectsDic;
+        public BuildType buildType = BuildType.Unknown;
+        public List<Object> Objects = null!;
+        public Dictionary<long, Object> ObjectsDic = null!;
 
-        public SerializedFileHeader header;
+        public SerializedFileHeader header = null!;
         private byte m_FileEndianess;
         public string unityVersion = "2.5.0f5";
         public BuildTarget m_TargetPlatform = BuildTarget.UnknownPlatform;
         private bool m_EnableTypeTree = true;
-        public List<SerializedType> m_Types;
+        public List<SerializedType> m_Types = null!;
         public int bigIDEnabled = 0;
-        public List<ObjectInfo> m_Objects;
-        private List<LocalSerializedObjectIdentifier> m_ScriptTypes;
-        public List<FileIdentifier> m_Externals;
-        public List<SerializedType> m_RefTypes;
-        public string userInformation;
+        public List<ObjectInfo> m_Objects = null!;
+        private List<LocalSerializedObjectIdentifier> m_ScriptTypes = null!;
+        public List<FileIdentifier> m_Externals = null!;
+        public List<SerializedType> m_RefTypes = null!;
+        public string userInformation = string.Empty;
 
         public SerializedFile(FileReader reader, AssetsManager assetsManager)
         {

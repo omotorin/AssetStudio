@@ -28,7 +28,7 @@ namespace AssetStudio
             decoder.SetDecoderProperties(properties);
 
             var compressedSize = inStream.Length - inStream.Position;
-            decoder.Code(inStream, newOutStream, compressedSize, outSize, null);
+            decoder.Code(inStream, newOutStream, compressedSize, outSize, null!);
 
             newOutStream.Position = 0;
             return newOutStream;
@@ -42,7 +42,7 @@ namespace AssetStudio
             if (compressedStream.Read(properties, 0, 5) != 5)
                 throw new Exception("input .lzma is too short");
             decoder.SetDecoderProperties(properties);
-            decoder.Code(compressedStream, decompressedStream, compressedSize - 5, decompressedSize, null);
+            decoder.Code(compressedStream, decompressedStream, compressedSize - 5, decompressedSize, null!);
             compressedStream.Position = basePosition + compressedSize;
         }
     }

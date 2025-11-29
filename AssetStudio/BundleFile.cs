@@ -35,10 +35,10 @@ namespace AssetStudio
     {
         public class Header
         {
-            public string signature;
+            public string signature = string.Empty;
             public uint version;
-            public string unityVersion;
-            public string unityRevision;
+            public string unityVersion = string.Empty;
+            public string unityRevision = string.Empty;
             public long size;
             public uint compressedBlocksInfoSize;
             public uint uncompressedBlocksInfoSize;
@@ -57,14 +57,14 @@ namespace AssetStudio
             public long offset;
             public long size;
             public uint flags;
-            public string path;
+            public string path = string.Empty;
         }
 
-        public Header m_Header;
-        private StorageBlock[] m_BlocksInfo;
-        private Node[] m_DirectoryInfo;
+        public Header m_Header = null!;
+        private StorageBlock[]? m_BlocksInfo;
+        private Node[]? m_DirectoryInfo;
 
-        public StreamFile[] fileList;
+        public StreamFile[] fileList = null!;
 
         public BundleFile(FileReader reader)
         {

@@ -8,7 +8,7 @@ namespace AssetStudio
 {
     public class TypeTree
     {
-        public List<TypeTreeNode> m_Nodes;
-        public byte[] m_StringBuffer;
+        public List<TypeTreeNode> m_Nodes = null!;
+        public byte[]? m_StringBuffer;
     }
 }

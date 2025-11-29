@@ -24,15 +24,22 @@ namespace AssetStudio
 
         public static string ReadAlignedString(this BinaryReader reader)
         {
-            var length = reader.ReadInt32();
-            if (length > 0 && length <= reader.BaseStream.Length - reader.BaseStream.Position)
+            try
             {
-                var stringData = reader.ReadBytes(length);
-                var result = Encoding.UTF8.GetString(stringData);
-                reader.AlignStream(4);
-                return result;
+                var length = reader.ReadInt32();
+                if (length > 0 && length <= reader.BaseStream.Length - reader.BaseStream.Position)
+                {
+                    var stringData = reader.ReadBytes(length);
+                    var result = Encoding.UTF8.GetString(stringData);
+                    reader.AlignStream(4);
+                    return result;
+                }
+                return "";
             }
-            return "";
+            catch (EndOfStreamException)
+            {
+                return "";
+            }
         }
 
         public static string ReadStringToNull(this BinaryReader reader, int maxLength = 32767)
