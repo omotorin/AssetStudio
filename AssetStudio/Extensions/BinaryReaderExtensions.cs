@@ -152,12 +152,17 @@ namespace AssetStudio
 
         public static bool[] ReadBooleanArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadBoolean, reader.ReadInt32(), reader);
+            var result = ReadArray(reader.ReadBoolean, reader.ReadInt32(), reader);
+            reader.AlignStream();
+            return result;
         }
 
         public static byte[] ReadUInt8Array(this BinaryReader reader)
         {
-            return reader.ReadBytes(reader.ReadInt32());
+            int length = reader.ReadInt32();
+            var result = reader.ReadBytes(length);
+            reader.AlignStream();
+            return result;
         }
 
         public static ushort[] ReadUInt16Array(this BinaryReader reader)
@@ -310,7 +315,9 @@ namespace AssetStudio
 
         public static float[] ReadSingleArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadSingle, reader.ReadInt32(), reader);
+            var result = ReadArray(reader.ReadSingle, reader.ReadInt32(), reader);
+            reader.AlignStream();
+            return result;
         }
 
         public static float[] ReadSingleArray(this BinaryReader reader, int length)
@@ -325,17 +332,23 @@ namespace AssetStudio
 
         public static Vector2[] ReadVector2Array(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadVector2, reader.ReadInt32(), reader);
+            var result = ReadArray(reader.ReadVector2, reader.ReadInt32(), reader);
+            reader.AlignStream();
+            return result;
         }
 
         public static Vector4[] ReadVector4Array(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadVector4, reader.ReadInt32(), reader);
+            var result = ReadArray(reader.ReadVector4, reader.ReadInt32(), reader);
+            reader.AlignStream();
+            return result;
         }
 
         public static Matrix4x4[] ReadMatrixArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadMatrix, reader.ReadInt32(), reader);
+            var result = ReadArray(reader.ReadMatrix, reader.ReadInt32(), reader);
+            reader.AlignStream();
+            return result;
         }
     }
 }
