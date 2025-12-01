@@ -383,10 +383,43 @@ namespace AssetStudio
         public PPtrCurve(ObjectReader reader)
         {
             int numCurves = reader.ReadInt32();
+            // Validate numCurves to prevent overflow
+            if (numCurves < 0 || numCurves > 1000000)
+            {
+                numCurves = 0;
+            }
+            
+            // Check available bytes
+            long currentPos = reader.Position;
+            long maxPos = reader.byteStart + reader.byteSize;
+            long estimatedBytesNeeded = numCurves * 20; // PPtrKeyframe minimum size
+            if (currentPos + estimatedBytesNeeded > maxPos)
+            {
+                long availableBytes = maxPos - currentPos - 50;
+                if (availableBytes > 0)
+                {
+                    numCurves = Math.Min(numCurves, (int)(availableBytes / 20));
+                }
+                else
+                {
+                    numCurves = 0;
+                }
+            }
+            
             curve = new PPtrKeyframe[numCurves];
             for (int i = 0; i < numCurves; i++)
             {
-                curve[i] = new PPtrKeyframe(reader);
+                try
+                {
+                    curve[i] = new PPtrKeyframe(reader);
+                }
+                catch (EndOfStreamException)
+                {
+                    var truncated = new PPtrKeyframe[i];
+                    Array.Copy(curve, truncated, i);
+                    curve = truncated;
+                    break;
+                }
             }
 
             attribute = reader.ReadAlignedString();
@@ -486,10 +519,46 @@ namespace AssetStudio
             m_LookAtWeight = reader.ReadVector4();
 
             int numGoals = reader.ReadInt32();
+            // Validate numGoals to prevent overflow and excessive memory allocation
+            if (numGoals < 0 || numGoals > 1000000) // Reasonable upper limit
+            {
+                numGoals = 0;
+            }
+            
+            // Check available bytes to prevent reading beyond object bounds
+            long currentPos = reader.Position;
+            long maxPos = reader.byteStart + reader.byteSize;
+            // Estimate: each HumanGoal needs at least 100 bytes
+            long estimatedBytesNeeded = numGoals * 100;
+            if (currentPos + estimatedBytesNeeded > maxPos)
+            {
+                // Calculate maximum safe number of goals
+                long availableBytes = maxPos - currentPos - 500; // Reserve space for rest of data
+                if (availableBytes > 0)
+                {
+                    numGoals = Math.Min(numGoals, (int)(availableBytes / 100));
+                }
+                else
+                {
+                    numGoals = 0;
+                }
+            }
+            
             m_GoalArray = new HumanGoal[numGoals];
             for (int i = 0; i < numGoals; i++)
             {
-                m_GoalArray[i] = new HumanGoal(reader);
+                try
+                {
+                    m_GoalArray[i] = new HumanGoal(reader);
+                }
+                catch (EndOfStreamException)
+                {
+                    // Truncate array if we hit end of stream
+                    var truncated = new HumanGoal[i];
+                    Array.Copy(m_GoalArray, truncated, i);
+                    m_GoalArray = truncated;
+                    break;
+                }
             }
 
             m_LeftHandPose = new HandPose(reader);
@@ -500,10 +569,27 @@ namespace AssetStudio
             if (version[0] > 5 || (version[0] == 5 && version[1] >= 2))//5.2 and up
             {
                 int numTDof = reader.ReadInt32();
+                // Validate numTDof to prevent overflow
+                if (numTDof < 0 || numTDof > 1000000) // Reasonable upper limit
+                {
+                    numTDof = 0;
+                }
+                
                 m_TDoFArray = new Vector3[numTDof];
                 for (int i = 0; i < numTDof; i++)
                 {
-                    m_TDoFArray[i] = version[0] > 5 || (version[0] == 5 && version[1] >= 4) ? reader.ReadVector3() : (Vector3)reader.ReadVector4();//5.4 and up
+                    try
+                    {
+                        m_TDoFArray[i] = version[0] > 5 || (version[0] == 5 && version[1] >= 4) ? reader.ReadVector3() : (Vector3)reader.ReadVector4();//5.4 and up
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        // Truncate array if we hit end of stream
+                        var truncated = new Vector3[i];
+                        Array.Copy(m_TDoFArray, truncated, i);
+                        m_TDoFArray = truncated;
+                        break;
+                    }
                 }
             }
         }
@@ -565,10 +651,27 @@ namespace AssetStudio
                 time = reader.ReadSingle();
 
                 int numKeys = reader.ReadInt32();
+                // Validate numKeys to prevent excessive memory allocation
+                if (numKeys < 0 || numKeys > 100000)
+                {
+                    numKeys = 0;
+                }
+                
                 keyList = new StreamedCurveKey[numKeys];
                 for (int i = 0; i < numKeys; i++)
                 {
-                    keyList[i] = new StreamedCurveKey(reader);
+                    try
+                    {
+                        keyList[i] = new StreamedCurveKey(reader);
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        // Truncate array if we hit end of stream
+                        var truncated = new StreamedCurveKey[i];
+                        Array.Copy(keyList, truncated, i);
+                        keyList = truncated;
+                        break;
+                    }
                 }
             }
         }
@@ -662,10 +765,43 @@ namespace AssetStudio
         public ValueArrayConstant(ObjectReader reader)
         {
             int numVals = reader.ReadInt32();
+            // Validate numVals to prevent overflow
+            if (numVals < 0 || numVals > 1000000)
+            {
+                numVals = 0;
+            }
+            
+            // Check available bytes
+            long currentPos = reader.Position;
+            long maxPos = reader.byteStart + reader.byteSize;
+            long estimatedBytesNeeded = numVals * 16; // ValueConstant minimum size
+            if (currentPos + estimatedBytesNeeded > maxPos)
+            {
+                long availableBytes = maxPos - currentPos - 20;
+                if (availableBytes > 0)
+                {
+                    numVals = Math.Min(numVals, (int)(availableBytes / 16));
+                }
+                else
+                {
+                    numVals = 0;
+                }
+            }
+            
             m_ValueArray = new ValueConstant[numVals];
             for (int i = 0; i < numVals; i++)
             {
-                m_ValueArray[i] = new ValueConstant(reader);
+                try
+                {
+                    m_ValueArray[i] = new ValueConstant(reader);
+                }
+                catch (EndOfStreamException)
+                {
+                    var truncated = new ValueConstant[i];
+                    Array.Copy(m_ValueArray, truncated, i);
+                    m_ValueArray = truncated;
+                    break;
+                }
             }
         }
     }
@@ -812,15 +948,82 @@ namespace AssetStudio
             {
                 var m_AdditionalCurveIndexArray = reader.ReadInt32Array();
             }
+            
+            // Align before reading numDeltas - this is critical for proper parsing
+            reader.AlignStream();
+            
             int numDeltas = reader.ReadInt32();
+            
+            // Validate numDeltas to prevent overflow and excessive memory allocation
+            if (numDeltas < 0)
+            {
+                Logger.Warning($"ClipMuscleConstant: Negative numDeltas: {numDeltas}");
+                numDeltas = 0;
+            }
+            else if (numDeltas > 1000000)
+            {
+                Logger.Warning($"ClipMuscleConstant: Excessive numDeltas: {numDeltas}");
+                numDeltas = 0;
+            }
+            
+            // Check available bytes to prevent reading beyond object bounds
+            long currentPos = reader.Position;
+            long maxPos = reader.byteStart + reader.byteSize;
+            
+            // Validate positions
+            if (currentPos < 0 || maxPos < currentPos)
+            {
+                Logger.Warning($"ClipMuscleConstant: Invalid positions - currentPos: {currentPos}, maxPos: {maxPos}");
+                numDeltas = 0;
+            }
+            else
+            {
+                // Estimate: each ValueDelta needs 8 bytes (2 floats)
+                long estimatedBytesNeeded = 0;
+                try
+                {
+                    checked
+                    {
+                        estimatedBytesNeeded = numDeltas * 8L;
+                    }
+                }
+                catch (OverflowException)
+                {
+                    Logger.Warning($"ClipMuscleConstant: Overflow when calculating estimatedBytesNeeded for numDeltas: {numDeltas}");
+                    numDeltas = 0;
+                    estimatedBytesNeeded = 0;
+                }
+                
+                if (currentPos + estimatedBytesNeeded > maxPos)
+                {
+                    // Calculate maximum safe number of deltas
+                    long availableBytes = maxPos - currentPos - 100; // Reserve space for rest of data
+                    if (availableBytes > 0)
+                    {
+                        numDeltas = Math.Min(numDeltas, (int)(availableBytes / 8));
+                    }
+                    else
+                    {
+                        numDeltas = 0;
+                    }
+                }
+            }
+            
             m_ValueArrayDelta = new ValueDelta[numDeltas];
             for (int i = 0; i < numDeltas; i++)
             {
-                m_ValueArrayDelta[i] = new ValueDelta(reader);
-            }
-            if (version[0] > 5 || (version[0] == 5 && version[1] >= 3))//5.3 and up
-            {
-                m_ValueArrayReferencePose = reader.ReadSingleArray();
+                try
+                {
+                    m_ValueArrayDelta[i] = new ValueDelta(reader);
+                }
+                catch (EndOfStreamException)
+                {
+                    // Truncate array if we hit end of stream
+                    var truncated = new ValueDelta[i];
+                    Array.Copy(m_ValueArrayDelta, truncated, i);
+                    m_ValueArrayDelta = truncated;
+                    break;
+                }
             }
 
             m_Mirror = reader.ReadBoolean();
@@ -890,17 +1093,82 @@ namespace AssetStudio
         public AnimationClipBindingConstant(ObjectReader reader)
         {
             int numBindings = reader.ReadInt32();
+            // Validate numBindings to prevent overflow
+            if (numBindings < 0 || numBindings > 1000000)
+            {
+                numBindings = 0;
+            }
+            
+            // Check available bytes
+            long currentPos = reader.Position;
+            long maxPos = reader.byteStart + reader.byteSize;
+            long estimatedBytesNeeded = numBindings * 30; // GenericBinding minimum size
+            if (currentPos + estimatedBytesNeeded > maxPos)
+            {
+                long availableBytes = maxPos - currentPos - 50;
+                if (availableBytes > 0)
+                {
+                    numBindings = Math.Min(numBindings, (int)(availableBytes / 30));
+                }
+                else
+                {
+                    numBindings = 0;
+                }
+            }
+            
             genericBindings = new GenericBinding[numBindings];
             for (int i = 0; i < numBindings; i++)
             {
-                genericBindings[i] = new GenericBinding(reader);
+                try
+                {
+                    genericBindings[i] = new GenericBinding(reader);
+                }
+                catch (EndOfStreamException)
+                {
+                    var truncated = new GenericBinding[i];
+                    Array.Copy(genericBindings, truncated, i);
+                    genericBindings = truncated;
+                    break;
+                }
             }
 
             int numMappings = reader.ReadInt32();
+            // Validate numMappings to prevent overflow
+            if (numMappings < 0 || numMappings > 1000000)
+            {
+                numMappings = 0;
+            }
+            
+            // Check available bytes for mappings
+            currentPos = reader.Position;
+            estimatedBytesNeeded = numMappings * 20; // PPtr size
+            if (currentPos + estimatedBytesNeeded > maxPos)
+            {
+                long availableBytes = maxPos - currentPos - 10;
+                if (availableBytes > 0)
+                {
+                    numMappings = Math.Min(numMappings, (int)(availableBytes / 20));
+                }
+                else
+                {
+                    numMappings = 0;
+                }
+            }
+            
             pptrCurveMapping = new PPtr<Object>[numMappings];
             for (int i = 0; i < numMappings; i++)
             {
-                pptrCurveMapping[i] = new PPtr<Object>(reader);
+                try
+                {
+                    pptrCurveMapping[i] = new PPtr<Object>(reader);
+                }
+                catch (EndOfStreamException)
+                {
+                    var truncated = new PPtr<Object>[i];
+                    Array.Copy(pptrCurveMapping, truncated, i);
+                    pptrCurveMapping = truncated;
+                    break;
+                }
             }
         }
 
@@ -998,111 +1266,195 @@ namespace AssetStudio
 
         public AnimationClip(ObjectReader reader) : base(reader)
         {
-            if (version[0] >= 5)//5.0 and up
+            try
             {
-                m_Legacy = reader.ReadBoolean();
-            }
-            else if (version[0] >= 4)//4.0 and up
-            {
-                m_AnimationType = (AnimationType)reader.ReadInt32();
-                if (m_AnimationType == AnimationType.Legacy)
+                if (version[0] >= 5)//5.0 and up
+                {
+                    m_Legacy = reader.ReadBoolean();
+                }
+                else if (version[0] >= 4)//4.0 and up
+                {
+                    m_AnimationType = (AnimationType)reader.ReadInt32();
+                    if (m_AnimationType == AnimationType.Legacy)
+                        m_Legacy = true;
+                }
+                else
+                {
                     m_Legacy = true;
-            }
-            else
-            {
-                m_Legacy = true;
-            }
-            m_Compressed = reader.ReadBoolean();
-            if (version[0] > 4 || (version[0] == 4 && version[1] >= 3))//4.3 and up
-            {
-                m_UseHighQualityCurve = reader.ReadBoolean();
-            }
-            reader.AlignStream();
-            int numRCurves = reader.ReadInt32();
-            m_RotationCurves = new QuaternionCurve[numRCurves];
-            for (int i = 0; i < numRCurves; i++)
-            {
-                m_RotationCurves[i] = new QuaternionCurve(reader);
-            }
-
-            int numCRCurves = reader.ReadInt32();
-            m_CompressedRotationCurves = new CompressedAnimationCurve[numCRCurves];
-            for (int i = 0; i < numCRCurves; i++)
-            {
-                m_CompressedRotationCurves[i] = new CompressedAnimationCurve(reader);
-            }
-
-            if (version[0] > 5 || (version[0] == 5 && version[1] >= 3))//5.3 and up
-            {
-                int numEulerCurves = reader.ReadInt32();
-                m_EulerCurves = new Vector3Curve[numEulerCurves];
-                for (int i = 0; i < numEulerCurves; i++)
-                {
-                    m_EulerCurves[i] = new Vector3Curve(reader);
                 }
-            }
-
-            int numPCurves = reader.ReadInt32();
-            m_PositionCurves = new Vector3Curve[numPCurves];
-            for (int i = 0; i < numPCurves; i++)
-            {
-                m_PositionCurves[i] = new Vector3Curve(reader);
-            }
-
-            int numSCurves = reader.ReadInt32();
-            m_ScaleCurves = new Vector3Curve[numSCurves];
-            for (int i = 0; i < numSCurves; i++)
-            {
-                m_ScaleCurves[i] = new Vector3Curve(reader);
-            }
-
-            int numFCurves = reader.ReadInt32();
-            m_FloatCurves = new FloatCurve[numFCurves];
-            for (int i = 0; i < numFCurves; i++)
-            {
-                m_FloatCurves[i] = new FloatCurve(reader);
-            }
-
-            if (version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
-            {
-                int numPtrCurves = reader.ReadInt32();
-                m_PPtrCurves = new PPtrCurve[numPtrCurves];
-                for (int i = 0; i < numPtrCurves; i++)
+                m_Compressed = reader.ReadBoolean();
+                if (version[0] > 4 || (version[0] == 4 && version[1] >= 3))//4.3 and up
                 {
-                    m_PPtrCurves[i] = new PPtrCurve(reader);
+                    m_UseHighQualityCurve = reader.ReadBoolean();
                 }
-            }
-
-            m_SampleRate = reader.ReadSingle();
-            m_WrapMode = reader.ReadInt32();
-            if (version[0] > 3 || (version[0] == 3 && version[1] >= 4)) //3.4 and up
-            {
-                m_Bounds = new AABB(reader);
-            }
-            if (version[0] >= 4)//4.0 and up
-            {
-                m_MuscleClipSize = reader.ReadUInt32();
-                m_MuscleClip = new ClipMuscleConstant(reader);
-            }
-            if (version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
-            {
-                m_ClipBindingConstant = new AnimationClipBindingConstant(reader);
-            }
-            if (version[0] > 2018 || (version[0] == 2018 && version[1] >= 3)) //2018.3 and up
-            {
-                var m_HasGenericRootTransform = reader.ReadBoolean();
-                var m_HasMotionFloatCurves = reader.ReadBoolean();
                 reader.AlignStream();
             }
-            int numEvents = reader.ReadInt32();
+            catch (EndOfStreamException)
+            {
+                // Animation clip data is incomplete, initialize with defaults
+                m_RotationCurves = new QuaternionCurve[0];
+                m_CompressedRotationCurves = new CompressedAnimationCurve[0];
+                m_PositionCurves = new Vector3Curve[0];
+                m_ScaleCurves = new Vector3Curve[0];
+                m_FloatCurves = new FloatCurve[0];
+                m_PPtrCurves = new PPtrCurve[0];
+                m_Events = new AnimationEvent[0];
+                return;
+            }
+
+            try
+            {
+                int numRCurves = reader.ReadInt32();
+                // Validate numRCurves
+                if (numRCurves < 0 || numRCurves > 100000) numRCurves = 0;
+                m_RotationCurves = new QuaternionCurve[numRCurves];
+                for (int i = 0; i < numRCurves; i++)
+                {
+                    try { m_RotationCurves[i] = new QuaternionCurve(reader); }
+                    catch (EndOfStreamException) { break; }
+                }
+
+                int numCRCurves = reader.ReadInt32();
+                // Validate numCRCurves
+                if (numCRCurves < 0 || numCRCurves > 100000) numCRCurves = 0;
+                m_CompressedRotationCurves = new CompressedAnimationCurve[numCRCurves];
+                for (int i = 0; i < numCRCurves; i++)
+                {
+                    try { m_CompressedRotationCurves[i] = new CompressedAnimationCurve(reader); }
+                    catch (EndOfStreamException) { break; }
+                }
+
+                if (version[0] > 5 || (version[0] == 5 && version[1] >= 3))//5.3 and up
+                {
+                    int numEulerCurves = reader.ReadInt32();
+                    // Validate numEulerCurves
+                    if (numEulerCurves < 0 || numEulerCurves > 100000) numEulerCurves = 0;
+                    m_EulerCurves = new Vector3Curve[numEulerCurves];
+                    for (int i = 0; i < numEulerCurves; i++)
+                    {
+                        try { m_EulerCurves[i] = new Vector3Curve(reader); }
+                        catch (EndOfStreamException) { break; }
+                    }
+                }
+
+                int numPCurves = reader.ReadInt32();
+                // Validate numPCurves
+                if (numPCurves < 0 || numPCurves > 100000) numPCurves = 0;
+                m_PositionCurves = new Vector3Curve[numPCurves];
+                for (int i = 0; i < numPCurves; i++)
+                {
+                    try { m_PositionCurves[i] = new Vector3Curve(reader); }
+                    catch (EndOfStreamException) { break; }
+                }
+
+                int numSCurves = reader.ReadInt32();
+                // Validate numSCurves
+                if (numSCurves < 0 || numSCurves > 100000) numSCurves = 0;
+                m_ScaleCurves = new Vector3Curve[numSCurves];
+                for (int i = 0; i < numSCurves; i++)
+                {
+                    try { m_ScaleCurves[i] = new Vector3Curve(reader); }
+                    catch (EndOfStreamException) { break; }
+                }
+
+                int numFCurves = reader.ReadInt32();
+                // Validate numFCurves
+                if (numFCurves < 0 || numFCurves > 100000) numFCurves = 0;
+                m_FloatCurves = new FloatCurve[numFCurves];
+                for (int i = 0; i < numFCurves; i++)
+                {
+                    try { m_FloatCurves[i] = new FloatCurve(reader); }
+                    catch (EndOfStreamException) { break; }
+                }
+
+                if (version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
+                {
+                    int numPtrCurves = reader.ReadInt32();
+                    // Validate numPtrCurves
+                    if (numPtrCurves < 0 || numPtrCurves > 100000) numPtrCurves = 0;
+                    m_PPtrCurves = new PPtrCurve[numPtrCurves];
+                    for (int i = 0; i < numPtrCurves; i++)
+                    {
+                        try { m_PPtrCurves[i] = new PPtrCurve(reader); }
+                        catch (EndOfStreamException) { break; }
+                    }
+                }
+
+                m_SampleRate = reader.ReadSingle();
+                m_WrapMode = reader.ReadInt32();
+                if (version[0] > 3 || (version[0] == 3 && version[1] >= 4)) //3.4 and up
+                {
+                    m_Bounds = new AABB(reader);
+                }
+                if (version[0] >= 4)//4.0 and up
+                {
+                    m_MuscleClipSize = reader.ReadUInt32();
+                    m_MuscleClip = new ClipMuscleConstant(reader);
+                }
+                if (version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
+                {
+                    m_ClipBindingConstant = new AnimationClipBindingConstant(reader);
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Core animation data ended prematurely
+                if (m_RotationCurves == null) m_RotationCurves = new QuaternionCurve[0];
+                if (m_CompressedRotationCurves == null) m_CompressedRotationCurves = new CompressedAnimationCurve[0];
+                if (m_PositionCurves == null) m_PositionCurves = new Vector3Curve[0];
+                if (m_ScaleCurves == null) m_ScaleCurves = new Vector3Curve[0];
+                if (m_FloatCurves == null) m_FloatCurves = new FloatCurve[0];
+                if (m_PPtrCurves == null) m_PPtrCurves = new PPtrCurve[0];
+                m_Events = new AnimationEvent[0];
+                return;
+            }
+
+            if (version[0] > 2018 || (version[0] == 2018 && version[1] >= 3)) //2018.3 and up
+            {
+                try
+                {
+                    var m_HasGenericRootTransform = reader.ReadBoolean();
+                    var m_HasMotionFloatCurves = reader.ReadBoolean();
+                    reader.AlignStream();
+                }
+                catch (EndOfStreamException)
+                {
+                    // Data ended before we could read these fields
+                    m_Events = new AnimationEvent[0];
+                    return;
+                }
+            }
+            
+            int numEvents = 0;
+            try
+            {
+                numEvents = reader.ReadInt32();
+            }
+            catch (EndOfStreamException)
+            {
+                // Data ended, no events to read
+                m_Events = new AnimationEvent[0];
+                return;
+            }
+            
+            // Validate numEvents
+            if (numEvents < 0 || numEvents > 100000) numEvents = 0;
             m_Events = new AnimationEvent[numEvents];
             for (int i = 0; i < numEvents; i++)
             {
-                m_Events[i] = new AnimationEvent(reader);
+                try { m_Events[i] = new AnimationEvent(reader); }
+                catch (EndOfStreamException) { break; }
             }
             if (version[0] >= 2017) //2017 and up
             {
-                reader.AlignStream();
+                try
+                {
+                    reader.AlignStream();
+                }
+                catch (EndOfStreamException)
+                {
+                    // Ignore if we can't align at the end
+                }
             }
         }
     }

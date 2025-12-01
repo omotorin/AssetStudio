@@ -7,6 +7,8 @@ namespace AssetStudio
 {
     public static class BinaryReaderExtensions
     {
+        private const int MAX_ARRAY_LENGTH = 1000000;
+
         public static void AlignStream(this BinaryReader reader)
         {
             reader.AlignStream(4);
@@ -89,18 +91,52 @@ namespace AssetStudio
             return new Matrix4x4(reader.ReadSingleArray(16));
         }
 
-        private static T[] ReadArray<T>(Func<T> del, int length)
+        private static T[] ReadArray<T>(Func<T> del, int length, BinaryReader? reader = null)
         {
-            if (length < 0 || length > 1000000) // Sanity check
+            if (length < 0 || length > MAX_ARRAY_LENGTH) // Sanity check
             {
                 return Array.Empty<T>();
             }
-            var array = new List<T>();
+            var array = new List<T>(length);
             try
             {
                 for (int i = 0; i < length; i++)
                 {
-                    array.Add(del());
+                    // Check if we can read before attempting to read
+                    if (reader != null)
+                    {
+                        // For ObjectReader, check byteSize limit
+                        if (reader is ObjectReader objectReader)
+                        {
+                            long currentPos = objectReader.BaseStream.Position;
+                            long maxPos = objectReader.byteStart + objectReader.byteSize;
+                            if (currentPos >= maxPos)
+                            {
+                                // Reached the end of this object's data
+                                break;
+                            }
+                        }
+                        // Also check stream length
+                        if (reader.BaseStream.Position >= reader.BaseStream.Length)
+                        {
+                            break;
+                        }
+                    }
+                    
+                    try
+                    {
+                        array.Add(del());
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        // Return partial array if stream ends prematurely
+                        break;
+                    }
+                    catch (OverflowException)
+                    {
+                        // Return partial array if overflow occurs
+                        break;
+                    }
                 }
             }
             catch (EndOfStreamException)
@@ -116,7 +152,7 @@ namespace AssetStudio
 
         public static bool[] ReadBooleanArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadBoolean, reader.ReadInt32());
+            return ReadArray(reader.ReadBoolean, reader.ReadInt32(), reader);
         }
 
         public static byte[] ReadUInt8Array(this BinaryReader reader)
@@ -128,17 +164,57 @@ namespace AssetStudio
         {
             try
             {
+                // Check if we have enough bytes to read the length (4 bytes for Int32)
+                if (reader.BaseStream.Position + sizeof(int) > reader.BaseStream.Length)
+                {
+                    return Array.Empty<ushort>();
+                }
+                
+                // For ObjectReader, also check byteSize limit
+                if (reader is ObjectReader objectReader)
+                {
+                    long currentPos = objectReader.BaseStream.Position;
+                    long maxPos = objectReader.byteStart + objectReader.byteSize;
+                    if (currentPos + sizeof(int) > maxPos)
+                    {
+                        return Array.Empty<ushort>();
+                    }
+                }
+                
                 var length = reader.ReadInt32();
-                if (length < 0 || length > 1000000) // Sanity check
+                if (length < 0 || length > MAX_ARRAY_LENGTH) // Sanity check
                 {
                     return Array.Empty<ushort>();
                 }
-                // Check if we have enough bytes
-                if (reader.BaseStream.Position + length * sizeof(ushort) > reader.BaseStream.Length)
+                
+                // Check if we have enough bytes for the array
+                long bytesNeeded = (long)length * sizeof(ushort);
+                long availableBytes = reader.BaseStream.Length - reader.BaseStream.Position;
+                
+                // For ObjectReader, also check byteSize limit
+                if (reader is ObjectReader objectReader2)
                 {
-                    return Array.Empty<ushort>();
+                    long currentPos = objectReader2.BaseStream.Position;
+                    long maxPos = objectReader2.byteStart + objectReader2.byteSize;
+                    long objectAvailableBytes = maxPos - currentPos;
+                    if (objectAvailableBytes < availableBytes)
+                    {
+                        availableBytes = objectAvailableBytes;
+                    }
                 }
-                return ReadArray(reader.ReadUInt16, length);
+                
+                if (bytesNeeded > availableBytes)
+                {
+                    // Calculate how many elements we can safely read
+                    int safeLength = (int)(availableBytes / sizeof(ushort));
+                    if (safeLength <= 0)
+                    {
+                        return Array.Empty<ushort>();
+                    }
+                    length = safeLength;
+                }
+                
+                return ReadArray(reader.ReadUInt16, length, reader);
             }
             catch (EndOfStreamException)
             {
@@ -152,57 +228,114 @@ namespace AssetStudio
 
         public static int[] ReadInt32Array(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadInt32, reader.ReadInt32());
+            int length;
+            try
+            {
+                length = reader.ReadInt32();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<int>();
+            }
+            if (length < 0)
+            {
+                Logger.Warning($"Negative numDeltas {length}");
+                return Array.Empty<int>();
+            }
+            if (length > MAX_ARRAY_LENGTH)
+            {
+                Logger.Warning($"Excessive numDeltas {length}");
+                return Array.Empty<int>();
+            }
+            return ReadArray(reader.ReadInt32, length, reader);
         }
 
         public static int[] ReadInt32Array(this BinaryReader reader, int length)
         {
-            return ReadArray(reader.ReadInt32, length);
+            return ReadArray(reader.ReadInt32, length, reader);
         }
 
         public static uint[] ReadUInt32Array(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadUInt32, reader.ReadInt32());
+            int length;
+            try
+            {
+                length = reader.ReadInt32();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<uint>();
+            }
+            if (length < 0)
+            {
+                Logger.Warning($"Negative numDeltas {length}");
+                return Array.Empty<uint>();
+            }
+            if (length > MAX_ARRAY_LENGTH)
+            {
+                Logger.Warning($"Excessive numDeltas {length}");
+                return Array.Empty<uint>();
+            }
+            return ReadArray(reader.ReadUInt32, length, reader);
         }
 
         public static uint[][] ReadUInt32ArrayArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadUInt32Array, reader.ReadInt32());
+            int length;
+            try
+            {
+                length = reader.ReadInt32();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<uint[]>();
+            }
+            if (length < 0)
+            {
+                Logger.Warning($"Negative numDeltas {length}");
+                return Array.Empty<uint[]>();
+            }
+            if (length > MAX_ARRAY_LENGTH)
+            {
+                Logger.Warning($"Excessive numDeltas {length}");
+                return Array.Empty<uint[]>();
+            }
+            return ReadArray(reader.ReadUInt32Array, length, reader);
         }
 
         public static uint[] ReadUInt32Array(this BinaryReader reader, int length)
         {
-            return ReadArray(reader.ReadUInt32, length);
+            return ReadArray(reader.ReadUInt32, length, reader);
         }
 
         public static float[] ReadSingleArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadSingle, reader.ReadInt32());
+            return ReadArray(reader.ReadSingle, reader.ReadInt32(), reader);
         }
 
         public static float[] ReadSingleArray(this BinaryReader reader, int length)
         {
-            return ReadArray(reader.ReadSingle, length);
+            return ReadArray(reader.ReadSingle, length, reader);
         }
 
         public static string[] ReadStringArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadAlignedString, reader.ReadInt32());
+            return ReadArray(reader.ReadAlignedString, reader.ReadInt32(), reader);
         }
 
         public static Vector2[] ReadVector2Array(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadVector2, reader.ReadInt32());
+            return ReadArray(reader.ReadVector2, reader.ReadInt32(), reader);
         }
 
         public static Vector4[] ReadVector4Array(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadVector4, reader.ReadInt32());
+            return ReadArray(reader.ReadVector4, reader.ReadInt32(), reader);
         }
 
         public static Matrix4x4[] ReadMatrixArray(this BinaryReader reader)
         {
-            return ReadArray(reader.ReadMatrix, reader.ReadInt32());
+            return ReadArray(reader.ReadMatrix, reader.ReadInt32(), reader);
         }
     }
 }

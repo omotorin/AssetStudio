@@ -652,7 +652,12 @@ namespace AssetStudio
             m_BlobIndex = reader.ReadUInt32();
             m_Channels = new ParserBindChannels(reader);
 
-            if ((version[0] >= 2019 && version[0] < 2021) || (version[0] == 2021 && version[1] < 2)) //2019 ~2021.1
+            // Unity 6 (6000.x) uses the same format as 2021.2+ (single m_KeywordIndices array)
+            // But we need to check if the data is actually present before reading
+            bool useOldFormat = (version[0] >= 2019 && version[0] < 2021) || (version[0] == 2021 && version[1] < 2);
+            bool useNewFormat = !useOldFormat && (version[0] < 6000 || version[0] >= 6000);
+            
+            if (useOldFormat) //2019 ~2021.1
             {
                 try
                 {
@@ -670,14 +675,22 @@ namespace AssetStudio
                     // Ignore - arrays will be empty
                 }
             }
-            else
+            else //2021.2+ and Unity 6+
             {
                 try
                 {
-                    m_KeywordIndices = reader.ReadUInt16Array();
-                    if (version[0] >= 2017) //2017 and up
+                    // Check if we have enough bytes before reading
+                    if (reader.BaseStream.Position + sizeof(int) <= reader.BaseStream.Length)
                     {
-                        reader.AlignStream();
+                        m_KeywordIndices = reader.ReadUInt16Array();
+                        if (version[0] >= 2017 || version[0] >= 6000) //2017 and up, Unity 6+
+                        {
+                            reader.AlignStream();
+                        }
+                    }
+                    else
+                    {
+                        m_KeywordIndices = Array.Empty<ushort>();
                     }
                 }
                 catch (EndOfStreamException)
@@ -1367,24 +1380,119 @@ namespace AssetStudio
                     compressedBlob = Array.Empty<byte>();
                 }
 
-                var m_DependenciesCount = reader.ReadInt32();
-                for (int i = 0; i < m_DependenciesCount; i++)
+                try
                 {
-                    new PPtr<Shader>(reader);
-                }
-
-                if (version[0] >= 2018)
-                {
-                    var m_NonModifiableTexturesCount = reader.ReadInt32();
-                    for (int i = 0; i < m_NonModifiableTexturesCount; i++)
+                    // Check if we have enough bytes to read m_DependenciesCount
+                    bool canReadDependencies = reader.BaseStream.Position + sizeof(int) <= reader.BaseStream.Length;
+                    if (canReadDependencies && reader is ObjectReader objectReader)
                     {
-                        var first = reader.ReadAlignedString();
-                        new PPtr<Texture>(reader);
+                        long currentPos = objectReader.BaseStream.Position;
+                        long maxPos = objectReader.byteStart + objectReader.byteSize;
+                        canReadDependencies = currentPos + sizeof(int) <= maxPos;
+                    }
+                    
+                    if (canReadDependencies)
+                    {
+                        var m_DependenciesCount = reader.ReadInt32();
+                        if (m_DependenciesCount >= 0 && m_DependenciesCount <= 1000)
+                        {
+                            for (int i = 0; i < m_DependenciesCount; i++)
+                            {
+                                try
+                                {
+                                    // Check if we can read PPtr before attempting
+                                    if (reader.BaseStream.Position >= reader.BaseStream.Length)
+                                    {
+                                        break;
+                                    }
+                                    if (reader is ObjectReader objectReader2)
+                                    {
+                                        long currentPos2 = objectReader2.BaseStream.Position;
+                                        long maxPos2 = objectReader2.byteStart + objectReader2.byteSize;
+                                        if (currentPos2 >= maxPos2)
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    new PPtr<Shader>(reader);
+                                }
+                                catch (EndOfStreamException)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (version[0] >= 2018)
+                    {
+                        // Check if we have enough bytes to read m_NonModifiableTexturesCount
+                        bool canReadTextures = reader.BaseStream.Position + sizeof(int) <= reader.BaseStream.Length;
+                        if (canReadTextures && reader is ObjectReader objectReader3)
+                        {
+                            long currentPos3 = objectReader3.BaseStream.Position;
+                            long maxPos3 = objectReader3.byteStart + objectReader3.byteSize;
+                            canReadTextures = currentPos3 + sizeof(int) <= maxPos3;
+                        }
+                        
+                        if (canReadTextures)
+                        {
+                            var m_NonModifiableTexturesCount = reader.ReadInt32();
+                            if (m_NonModifiableTexturesCount >= 0 && m_NonModifiableTexturesCount <= 1000)
+                            {
+                                for (int i = 0; i < m_NonModifiableTexturesCount; i++)
+                                {
+                                    try
+                                    {
+                                        // Check if we can read before attempting
+                                        if (reader.BaseStream.Position >= reader.BaseStream.Length)
+                                        {
+                                            break;
+                                        }
+                                        if (reader is ObjectReader objectReader4)
+                                        {
+                                            long currentPos4 = objectReader4.BaseStream.Position;
+                                            long maxPos4 = objectReader4.byteStart + objectReader4.byteSize;
+                                            if (currentPos4 >= maxPos4)
+                                            {
+                                                break;
+                                            }
+                                        }
+                                        var first = reader.ReadAlignedString();
+                                        new PPtr<Texture>(reader);
+                                    }
+                                    catch (EndOfStreamException)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Check if we can read m_ShaderIsBaked
+                    bool canReadBoolean = reader.BaseStream.Position < reader.BaseStream.Length;
+                    if (canReadBoolean && reader is ObjectReader objectReader5)
+                    {
+                        long currentPos5 = objectReader5.BaseStream.Position;
+                        long maxPos5 = objectReader5.byteStart + objectReader5.byteSize;
+                        canReadBoolean = currentPos5 < maxPos5;
+                    }
+                    
+                    if (canReadBoolean)
+                    {
+                        var m_ShaderIsBaked = reader.ReadBoolean();
+                        reader.AlignStream();
                     }
                 }
-
-                var m_ShaderIsBaked = reader.ReadBoolean();
-                reader.AlignStream();
+                catch (EndOfStreamException)
+                {
+                    // Silently handle end of stream
+                }
+                catch (OverflowException)
+                {
+                    // Silently handle overflow
+                }
             }
             else
             {

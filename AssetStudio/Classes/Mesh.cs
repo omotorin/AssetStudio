@@ -180,6 +180,9 @@ namespace AssetStudio
 
         private void GetStreams(int[] version)
         {
+            if (m_Channels == null || m_Channels.Length == 0)
+                return;
+
             var streamCount = m_Channels.Max(x => x.stream) + 1;
             m_Streams = new StreamInfo[streamCount];
             uint offset = 0;
@@ -187,7 +190,6 @@ namespace AssetStudio
             {
                 uint chnMask = 0;
                 uint stride = 0;
-                if (m_Channels == null) continue;
                 for (int chn = 0; chn < m_Channels.Length; chn++)
                 {
                     var m_Channel = m_Channels[chn];
@@ -209,7 +211,6 @@ namespace AssetStudio
                     frequency = 0
                 };
                 offset += m_VertexCount * stride;
-                //static size_t AlignStreamSize (size_t size) { return (size + (kVertexStreamAlign-1)) & ~(kVertexStreamAlign-1); }
                 offset = (offset + (16u - 1u)) & ~(16u - 1u);
             }
         }
@@ -743,13 +744,13 @@ namespace AssetStudio
                             {
                                 var buff = new byte[componentByteSize];
                                 Buffer.BlockCopy(componentBytes, i * componentByteSize, buff, 0, componentByteSize);
-                                buff = buff.Reverse().ToArray();
+                                buff = Enumerable.Reverse(buff).ToArray();
                                 Buffer.BlockCopy(buff, 0, componentBytes, i * componentByteSize, componentByteSize);
                             }
                         }
 
-                        int[] componentsIntArray = null;
-                        float[] componentsFloatArray = null;
+                        int[]? componentsIntArray = null;
+                        float[]? componentsFloatArray = null;
                         if (MeshHelper.IsIntFormat(vertexFormat))
                             componentsIntArray = MeshHelper.BytesToIntArray(componentBytes, vertexFormat);
                         else
